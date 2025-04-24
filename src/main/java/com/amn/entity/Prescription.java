@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -33,4 +35,8 @@ public class Prescription extends MedicalDocument {
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private Doctor prescribingDoctor;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "prescription_id") // this creates the FK in Medication table
+    private List<Medication> medications;
+
 }

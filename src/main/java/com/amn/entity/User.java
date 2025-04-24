@@ -1,6 +1,6 @@
 package com.amn.entity;
 
-import com.amn.enums.Role;
+import com.amn.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
