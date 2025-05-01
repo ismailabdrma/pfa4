@@ -1,18 +1,30 @@
 package com.amn.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Scan extends MedicalDocument {
-    private String scanType; // MRI, CT, X-Ray
-    private String fileUrl;
+@SuperBuilder
+@Entity
+public class Scan {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String type; // For example: "Scan"
+    private String description;
+    private String url;
+    private LocalDateTime uploadDate;
+
+
+    @ManyToOne
+    @JoinColumn(name = "medical_folder_id")
+    private MedicalFolder medicalFolder;
 }

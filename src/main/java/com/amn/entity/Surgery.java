@@ -1,20 +1,31 @@
 package com.amn.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Surgery extends MedicalDocument {
-    private String procedureType;
+@SuperBuilder
+@Entity
+public class Surgery {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String type; // For example: "Surgery"
+    private String description;
+    private String url;
+    private LocalDateTime uploadDate;
     private String surgeonName;
     private String hospitalName;
-    private String complications;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medical_folder_id")
+    private MedicalFolder medicalFolder;
 }

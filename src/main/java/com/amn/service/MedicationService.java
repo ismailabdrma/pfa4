@@ -1,60 +1,41 @@
 package com.amn.service;
 
-import com.amn.dto.MedicationDTO;
 import com.amn.entity.Medication;
 import com.amn.entity.Pharmacist;
-import com.amn.entity.enums.Role;
+import com.amn.entity.enums.MedicationType;
 import com.amn.repository.MedicationRepository;
+import com.amn.repository.PharmacistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MedicationService {
 
     private final MedicationRepository medicationRepository;
+    private final PharmacistRepository pharmacistRepository;
 
-    // List all medications - role-based filtering
-    public List<MedicationDTO> getAllMedications(Role userRole) {
-        return medicationRepository.findAll().stream()
-                .map(med -> mapToDTO(med, userRole))
-                .collect(Collectors.toList());
-    }
+    // Add a new medication
+    public Medication addMedication(Medication medication, Long pharmacistId) {
+        Pharmacist pharmacist = pharmacistRepository.findById(pharmacistId)
+                .orElseThrow(() -> new RuntimeException("Pharmacist not found"));
 
-    // Search medication by name (optional filtering)
-    public List<MedicationDTO> searchByName(String keyword, Role userRole) {
-        return medicationRepository.findByNameContainingIgnoreCase(keyword).stream()
-                .map(med -> mapToDTO(med, userRole))
-                .collect(Collectors.toList());
-    }
-
-    // Get single medication by ID (optional access control)
-    public Optional<MedicationDTO> getById(Long id, Role userRole) {
-        return medicationRepository.findById(id)
-                .map(med -> mapToDTO(med, userRole));
-    }
-
-    // Add a new medication - pharmacists only
-    public Medication addMedication(Medication medication, Pharmacist pharmacist) {
         medication.setAddedBy(pharmacist);
+        if (medication.getType() == null) {
+            medication.setType(MedicationType.PRESCRIPTION); // Default if not set
+        }
         return medicationRepository.save(medication);
     }
 
-    // Internal DTO mapping (filtering price if not pharmacist)
-    private MedicationDTO mapToDTO(Medication med, Role role) {
-        MedicationDTO dto = new MedicationDTO();
-        dto.setId(med.getId());
-        dto.setName(med.getName());
-        dto.setSize(med.getSize());
-        dto.setType(med.getMedicationType());
-        if (role == Role.PHARMACIST) {
-            dto.setPrice(med.getPrice());
-        }
-        return dto;
+    // List all medications
+    public List<Medication> getAllMedications() {
+        return medicationRepository.findAll();
     }
 
+    // Search medications by name
+    public List<Medication> searchMedicationsByName(String keyword) {
+        return medicationRepository.findByNameContainingIgnoreCase(keyword);
+    }
 }

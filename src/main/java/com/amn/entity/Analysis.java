@@ -1,30 +1,29 @@
 package com.amn.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
-import java.util.Set;
+import java.time.LocalDateTime;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
+@Entity
 public class Analysis {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private String type;
-    private Date Date;
-    private String filelink ;
+    private Long id;
 
-    // Correct relationship mapping
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medical_record_id")  // Explicit column name
-    private MedicalRecord medicalRecord;
+    private String title;
+    private String type; // For example: "Analysis"
+    private String description;
+    private String url;
+    private LocalDateTime uploadDate;
 
+    @ManyToOne
+    @JoinColumn(name = "medical_folder_id")
+    private MedicalFolder medicalFolder;
 }

@@ -1,18 +1,17 @@
 package com.amn.entity;
 
+import com.amn.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Set;
-
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
+@Entity
+@EqualsAndHashCode(callSuper = true)
 public class Admin extends User {
 
     // Relationship with Patient (1:many)
@@ -26,4 +25,8 @@ public class Admin extends User {
     // Relationships with Pharmacist (1:many)
     @OneToMany(mappedBy = "approvedBy", cascade = CascadeType.ALL)
     private Set<Pharmacist> approvedPharmacists;
+    public Admin(String name, String email, String password) {
+        super(name, email, password, Role.ADMIN);
+    }
+
 }

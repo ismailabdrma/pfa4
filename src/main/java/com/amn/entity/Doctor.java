@@ -1,19 +1,22 @@
 package com.amn.entity;
 
 import com.amn.entity.enums.AccountStatus;
+import com.amn.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
+@Entity
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+
 public class Doctor extends User {
     private String matricule;
     private String specialty;
@@ -29,5 +32,8 @@ public class Doctor extends User {
     private List<MedicalRecord> createdRecords;
     @OneToMany(mappedBy = "prescribingDoctor", cascade = CascadeType.ALL)
     private List<Prescription> prescriptions;
+    public Doctor(String name, String email, String password) {
+        super(name, email, password, Role.DOCTOR);
+    }
 
 }
