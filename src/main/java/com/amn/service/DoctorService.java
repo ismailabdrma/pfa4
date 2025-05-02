@@ -81,4 +81,13 @@ public class DoctorService {
 
         return prescriptionRepository.save(prescription);
     }
+    public MedicalFolder getMedicalFolderByCinAndName(String cin, String fullName) {
+        Patient patient = patientRepository.findByCin(cin)
+                .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
+                .orElseThrow(() -> new RuntimeException("Patient not found or name does not match"));
+
+        return medicalFolderRepository.findByPatientId(patient.getId())
+                .orElseThrow(() -> new RuntimeException("Medical folder not found"));
+    }
+
 }

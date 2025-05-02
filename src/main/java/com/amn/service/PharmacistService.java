@@ -61,4 +61,11 @@ public class PharmacistService {
 
         return medicationRepository.save(medication);
     }
+    public List<Prescription> viewPrescriptionsByPatient(String cin, String fullName) {
+        return prescriptionRepository.findAll().stream()
+                .filter(p -> p.getPatient().getCin().equalsIgnoreCase(cin)
+                        && p.getPatient().getFullName().equalsIgnoreCase(fullName))
+                .toList();
+    }
+
 }
