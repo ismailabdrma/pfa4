@@ -1,0 +1,15 @@
+.role-selection {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.role-buttons button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.auth-links {
+  margin-top: 20px;
+}
+

@@ -1,0 +1,30 @@
+<h2>📦 Rechercher les prescriptions</h2>
+<form (submit)="searchPrescriptions()">
+  <label>CIN:</label>
+  <input [(ngModel)]="cin" name="cin" required />
+
+  <label>Nom complet:</label>
+  <input [(ngModel)]="fullName" name="fullName" required />
+
+  <button type="submit">Rechercher</button>
+</form>
+
+<hr />
+
+<div *ngIf="prescriptions.length > 0">
+  <h3>📝 Prescriptions trouvées</h3>
+  <ul>
+    <li *ngFor="let p of prescriptions">
+      {{ p.medicines || p.medicationName }} - {{ p.instructions || p.status }}
+      <button (click)="validatePrescription(p.id)" [disabled]="p.status === 'DISPENSED'">Valider</button>
+    </li>
+  </ul>
+
+  <h3>➕ Ajouter un Médicament OTC</h3>
+  <form (submit)="addOTC()">
+    <input [(ngModel)]="otcMedication.name" name="name" placeholder="Nom" required />
+    <input [(ngModel)]="otcMedication.size" name="size" placeholder="Dosage" required />
+    <input [(ngModel)]="otcMedication.price" name="price" type="number" placeholder="Prix" required />
+    <button type="submit">Ajouter</button>
+  </form>
+</div>

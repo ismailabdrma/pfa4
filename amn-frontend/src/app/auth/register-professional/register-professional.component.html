@@ -1,0 +1,15 @@
+<h2>Inscription Professionnel</h2>
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  <input type="text" formControlName="name" placeholder="Nom Complet">
+  <input type="email" formControlName="email" placeholder="Email">
+  <input type="text" formControlName="phone" placeholder="Téléphone">
+  <input type="password" formControlName="password" placeholder="Mot de passe">
+
+  <select formControlName="role">
+    <option value="DOCTOR">Médecin</option>
+    <option value="PHARMACIST">Pharmacien</option>
+    <option value="ADMIN">Admin</option>
+  </select>
+
+  <button type="submit">S'inscrire</button>
+</form>

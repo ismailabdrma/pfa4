@@ -1,0 +1,9 @@
+<h2>Bienvenue, {{ profile?.fullName }}</h2>
+
+<div *ngIf="profile">
+  <p><strong>Email :</strong> {{ profile.email }}</p>
+  <p><strong>Téléphone :</strong> {{ profile.phone }}</p>
+  <p><strong>Adresse :</strong> {{ profile.address || 'Non renseignée' }}</p>
+  <p><strong>Groupe Sanguin :</strong> {{ profile.bloodType }}</p>
+  <p><strong>Maladies chroniques :</strong> {{ profile.chronicDiseases }}</p>
+</div>

@@ -1,0 +1,33 @@
+<div class="doctor-dashboard">
+  <h2>Dashboard Médecin</h2>
+
+  <!-- 🔍 Patient Search -->
+  <div>
+    <h3>Chercher un patient</h3>
+    <input type="text" [(ngModel)]="cin" placeholder="CIN du patient" />
+    <input type="text" [(ngModel)]="fullName" placeholder="Nom complet du patient" />
+    <button (click)="searchPatient(cin, fullName)">Rechercher</button>
+  </div>
+
+  <!-- 📁 Medical Folder -->
+  <div *ngIf="medicalFolder">
+    <h3>Dossier Médical de {{ medicalFolder.patient.fullName }}</h3>
+
+    <!-- 📝 Create Medical Record -->
+    <div>
+      <h4>Ajouter un dossier médical</h4>
+      <input type="text" [(ngModel)]="medicalRecord.reason" placeholder="Motif" />
+      <input type="text" [(ngModel)]="medicalRecord.diagnosis" placeholder="Diagnostic" />
+      <textarea [(ngModel)]="medicalRecord.notes" placeholder="Notes"></textarea>
+      <button (click)="createMedicalRecord()">Ajouter</button>
+    </div>
+
+    <!-- 💊 Write Prescription -->
+    <div>
+      <h4>Prescrire un traitement</h4>
+      <input type="text" [(ngModel)]="prescription.medicines" placeholder="Médicaments" />
+      <textarea [(ngModel)]="prescription.instructions" placeholder="Instructions"></textarea>
+      <button (click)="writePrescription()">Prescrire</button>
+    </div>
+  </div>
+</div>
