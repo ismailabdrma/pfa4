@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED) // optional, good for abstract class inheritance
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class User implements UserDetails {
 
     @Id
@@ -40,11 +40,9 @@ public abstract class User implements UserDetails {
 
     protected String address;
 
-    // ==== UserDetails Implementation ====
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(role); // role must implement GrantedAuthority
+        return List.of(role);
     }
 
     @Override
@@ -71,11 +69,4 @@ public abstract class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    public User(String name, String email, String password, Role role) {
-        this.fullName = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
-
 }

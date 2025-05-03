@@ -28,8 +28,6 @@ public class Pharmacist extends User {
     // Relationship with Prescription (pharmacist dispenses prescriptions)
     @OneToMany(mappedBy = "dispensingPharmacist", cascade = CascadeType.ALL)
     private List<Prescription> dispensedPrescriptions;
-    public Pharmacist(String name, String email, String password) {
-        super(name, email, password, Role.PHARMACIST);
-    }
+
 
 }

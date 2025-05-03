@@ -7,7 +7,7 @@ import com.amn.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/doctor")
 @RequiredArgsConstructor
@@ -47,4 +47,16 @@ public class DoctorController {
                 doctorService.writePrescription(patientId, prescription)
         );
     }
+    @PostMapping("/create-folder/{patientId}")
+    public ResponseEntity<MedicalFolder> createFolder(@PathVariable Long patientId) {
+        return ResponseEntity.ok(doctorService.createMedicalFolder(patientId));
+    }
+    @GetMapping("/get-id")
+    public ResponseEntity<Long> getPatientId(@RequestParam String cin, @RequestParam String fullName) {
+        return ResponseEntity.ok(
+                doctorService.getPatientIdByCinAndName(cin, fullName)
+        );
+    }
+
+
 }

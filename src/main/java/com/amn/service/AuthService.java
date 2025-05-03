@@ -2,11 +2,7 @@ package com.amn.service;
 
 import com.amn.dto.AuthResponse;
 import com.amn.dto.RegisterRequest;
-import com.amn.entity.Admin;
-import com.amn.entity.Doctor;
-import com.amn.entity.Patient;
-import com.amn.entity.Pharmacist;
-import com.amn.entity.User;
+import com.amn.entity.*;
 import com.amn.entity.enums.Role;
 import com.amn.repository.UserRepository;
 import com.amn.security.JwtService;
@@ -15,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+
+import static com.amn.entity.enums.Role.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,30 +30,41 @@ public class AuthService {
                     .fullName(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.DOCTOR)
+                    .phone(request.getPhone())
+                    .role(DOCTOR)
                     .build();
+
             case PATIENT -> user = Patient.builder()
                     .fullName(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.PATIENT)
+                    .phone(request.getPhone())
+                    .role(PATIENT)
+                    .cin(request.getCin())
+                    .birthDate(request.getBirthDate())
+                    .bloodType(request.getBloodType())
                     .build();
+
             case PHARMACIST -> user = Pharmacist.builder()
                     .fullName(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.PHARMACIST)
+                    .phone(request.getPhone())
+                    .role(PHARMACIST)
                     .build();
+
             case ADMIN -> user = Admin.builder()
                     .fullName(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
+                    .phone(request.getPhone())
                     .role(Role.ADMIN)
                     .build();
+
             default -> throw new IllegalArgumentException("Unsupported role: " + request.getRole());
         }
 
-        userRepository.save(user);
+        userRepository.save(user); // only one save outside the switch
 
         String token = jwtService.generateToken(
                 Map.of("role", user.getRole().name()),

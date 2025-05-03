@@ -50,8 +50,13 @@ public class JwtService {
 
     // ✅ Full token with extra claims (e.g., role)
     public String generateToken(Map<String, Object> extraClaims, String username) {
-        return Jwts
-                .builder()
+        // Add ROLE_ prefix for Spring Security
+        if(extraClaims.containsKey("role")) {
+            String role = (String) extraClaims.get("role");
+            extraClaims.put("role", "ROLE_" + role);
+        }
+
+        return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))

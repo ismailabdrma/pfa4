@@ -32,8 +32,6 @@ public class Doctor extends User {
     private List<MedicalRecord> createdRecords;
     @OneToMany(mappedBy = "prescribingDoctor", cascade = CascadeType.ALL)
     private List<Prescription> prescriptions;
-    public Doctor(String name, String email, String password) {
-        super(name, email, password, Role.DOCTOR);
-    }
+
 
 }

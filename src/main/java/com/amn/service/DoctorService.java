@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -89,5 +90,34 @@ public class DoctorService {
         return medicalFolderRepository.findByPatientId(patient.getId())
                 .orElseThrow(() -> new RuntimeException("Medical folder not found"));
     }
+    public List<Prescription> getPrescriptionsByCinAndName(String cin, String fullName) {
+        Patient patient = patientRepository.findByCin(cin)
+                .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
+                .orElseThrow(() -> new RuntimeException("Patient not found or name does not match"));
+
+        return prescriptionRepository.findAllByPatientId(patient.getId());
+    }
+    public MedicalFolder createMedicalFolder(Long patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        // Check if folder already exists
+        if (medicalFolderRepository.findByPatientId(patientId).isPresent()) {
+            throw new RuntimeException("Medical folder already exists for this patient.");
+        }
+
+        MedicalFolder folder = new MedicalFolder();
+        folder.setPatient(patient);
+        return medicalFolderRepository.save(folder);
+    }
+    public Long getPatientIdByCinAndName(String cin, String fullName) {
+        return patientRepository.findByCin(cin)
+                .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
+                .map(Patient::getId)
+                .orElseThrow(() -> new RuntimeException("Patient not found or name mismatch"));
+    }
+
+
+
 
 }

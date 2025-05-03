@@ -1,11 +1,13 @@
 package com.amn.entity;
 
+import com.amn.entity.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
-import com.amn.entity.enums.Role;
-
 import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,9 +15,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 @EqualsAndHashCode(callSuper = true)
-
-
 public class Patient extends User {
+
     private String cin;
     private String bloodType;
     private String emergencyContact;
@@ -25,16 +26,14 @@ public class Patient extends User {
     private boolean hasSurgery;
     private LocalDate birthDate;
 
-
-
     @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
+    @JsonIgnore
     private MedicalFolder medicalFolder;
+
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private Admin managedBy;
-    public Patient(String name, String email, String password) {
-        super(name, email, password, Role.PATIENT);
-    }
 
-
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Medication> medications;
 }

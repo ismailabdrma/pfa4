@@ -27,7 +27,7 @@ export class DoctorComponent {
     instructions: ''
   };
 
-  constructor(private doctorService: DoctorService) {} // ✅ Inject the service
+  constructor(private doctorService: DoctorService) {}
 
   searchPatient(cin: string, fullName: string) {
     this.doctorService.getMedicalFolder(cin, fullName).subscribe({
@@ -37,10 +37,21 @@ export class DoctorComponent {
       },
       error: (err) => {
         if (err.status === 404) {
-          const shouldCreate = confirm("Patient non trouvé. Voulez-vous créer un dossier médical ?");
-          if (shouldCreate) {
-            // 🔁 You need to create this endpoint in your backend or adjust logic
-            alert("Le médecin ne peut pas créer un patient ici. Veuillez enregistrer le patient d'abord.");
+          const confirmCreate = confirm("Dossier médical non trouvé. Voulez-vous le créer ?");
+          if (confirmCreate) {
+            this.doctorService.getPatientIdByCin(cin, fullName).subscribe({
+              next: (id: number) => {
+                this.patientId = id;
+                this.doctorService.createFolder(id).subscribe({
+                  next: (createdFolder) => {
+                    this.medicalFolder = createdFolder;
+                    alert("Dossier médical créé avec succès.");
+                  },
+                  error: () => alert("Erreur lors de la création du dossier.")
+                });
+              },
+              error: () => alert("Patient introuvable. Veuillez vérifier les informations.")
+            });
           }
         }
       }
@@ -63,3 +74,4 @@ export class DoctorComponent {
     });
   }
 }
+

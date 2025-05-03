@@ -6,16 +6,12 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@Getter
-@Setter
 public class Prescription {
 
     @Id
@@ -28,8 +24,10 @@ public class Prescription {
 
     @Enumerated(EnumType.STRING)
     private PrescriptionStatus status;
+
     private boolean permanent;
-    private LocalDateTime prescribedDate; // fixed
+
+    private LocalDateTime prescribedDate;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
@@ -42,8 +40,4 @@ public class Prescription {
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private Doctor prescribingDoctor;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "prescription_id")
-    private List<Medication> medications;
 }

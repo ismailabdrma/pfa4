@@ -30,6 +30,10 @@ public class Medication {
     private Pharmacist addedBy;
     @ManyToOne
     private Prescription prescription;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
 
 
 }

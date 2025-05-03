@@ -25,8 +25,6 @@ public class Admin extends User {
     // Relationships with Pharmacist (1:many)
     @OneToMany(mappedBy = "approvedBy", cascade = CascadeType.ALL)
     private Set<Pharmacist> approvedPharmacists;
-    public Admin(String name, String email, String password) {
-        super(name, email, password, Role.ADMIN);
-    }
+
 
 }

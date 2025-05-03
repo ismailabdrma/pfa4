@@ -1,3 +1,4 @@
+// ✅ PharmacistController.java
 package com.amn.controller;
 
 import com.amn.entity.Medication;
@@ -16,42 +17,31 @@ public class PharmacistController {
 
     private final PharmacistService pharmacistService;
 
-    // ✅ View all prescriptions
-    @GetMapping("/prescriptions")
-    public ResponseEntity<List<Prescription>> getAllPrescriptions() {
-        return ResponseEntity.ok(pharmacistService.viewPrescriptions());
-    }
-
-    // ✅ View prescriptions by patient CIN and full name
+    // ✅ View prescriptions by patient CIN and name
     @GetMapping("/prescriptions/by-patient")
     public ResponseEntity<List<Prescription>> getPrescriptionsByCinAndName(
             @RequestParam String cin,
             @RequestParam String fullName
     ) {
-        return ResponseEntity.ok(
-                pharmacistService.viewPrescriptionsByPatient(cin, fullName)
-        );
+        return ResponseEntity.ok(pharmacistService.viewPrescriptionsByPatient(cin, fullName));
     }
 
-    // ✅ Dispense a prescription
+    // ✅ Dispense prescription
     @PostMapping("/dispense")
     public ResponseEntity<Prescription> dispensePrescription(
             @RequestParam Long prescriptionId,
             @RequestParam Long pharmacistId
     ) {
-        return ResponseEntity.ok(
-                pharmacistService.dispensePrescription(prescriptionId, pharmacistId)
-        );
+        return ResponseEntity.ok(pharmacistService.dispensePrescription(prescriptionId, pharmacistId));
     }
 
-    // ✅ Add Over-The-Counter (OTC) medication
+    // ✅ Add OTC medication + log it as a prescription
     @PostMapping("/add-otc")
-    public ResponseEntity<Medication> addOTCMedication(
+    public ResponseEntity<Medication> addOTC(
             @RequestBody Medication medication,
-            @RequestParam Long pharmacistId
+            @RequestParam Long pharmacistId,
+            @RequestParam Long patientId
     ) {
-        return ResponseEntity.ok(
-                pharmacistService.addOTCMedication(medication, pharmacistId)
-        );
+        return ResponseEntity.ok(pharmacistService.addOTCMedication(medication, pharmacistId, patientId));
     }
 }

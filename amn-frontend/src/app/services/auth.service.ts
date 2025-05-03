@@ -20,16 +20,16 @@ export class AuthService {
   }
 
   saveToken(token: string) {
-    localStorage.setItem('jwt', token);
+    localStorage.setItem('jwt', token); // ✅ Sauvegarde du token
   }
 
   getToken(): string | null {
-    return localStorage.getItem('jwt');
+    return localStorage.getItem('jwt'); // ✅ Récupération du token
   }
 
   logout() {
-    localStorage.removeItem('jwt');
-    this.router.navigate(['/login']);
+    localStorage.removeItem('jwt'); // ✅ Suppression du token
+    this.router.navigate(['/login']); // ✅ Redirection
   }
 
   redirectToDashboard() {
@@ -39,24 +39,28 @@ export class AuthService {
       return;
     }
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const role = payload.role;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload.role;
 
-    switch (role) {
-      case 'PATIENT':
-        this.router.navigate(['/dashboard/patient']);
-        break;
-      case 'DOCTOR':
-        this.router.navigate(['/dashboard/doctor']);
-        break;
-      case 'PHARMACIST':
-        this.router.navigate(['/dashboard/pharmacist']);
-        break;
-      case 'ADMIN':
-        this.router.navigate(['/dashboard/admin']);
-        break;
-      default:
-        this.router.navigate(['/login']);
+      switch (role) {
+        case 'PATIENT':
+          this.router.navigate(['/dashboard/patient']);
+          break;
+        case 'DOCTOR':
+          this.router.navigate(['/dashboard/doctor']);
+          break;
+        case 'PHARMACIST':
+          this.router.navigate(['/dashboard/pharmacist']);
+          break;
+        case 'ADMIN':
+          this.router.navigate(['/dashboard/admin']);
+          break;
+        default:
+          this.router.navigate(['/login']);
+      }
+    } catch (error) {
+      this.logout(); // Token mal formé → déconnexion
     }
   }
 }

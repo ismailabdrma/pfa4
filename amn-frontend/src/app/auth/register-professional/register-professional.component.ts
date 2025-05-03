@@ -19,7 +19,8 @@ export class RegisterProfessionalComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       phone: ['', Validators.required],
-      role: ['', Validators.required] // Must be DOCTOR, PHARMACIST, or ADMIN
+      role: ['', Validators.required],
+      matricule: ['', Validators.required]// Must be DOCTOR, PHARMACIST, or ADMIN
     });
   }
 
