@@ -1,0 +1,65 @@
+<div class="container mx-auto max-w-xl p-6 bg-white rounded shadow">
+  <h2 class="text-2xl font-semibold mb-4 text-center">Create Medical Folder</h2>
+
+  <form [formGroup]="folderForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label>CIN</label>
+      <input formControlName="cin" class="input" type="text" required />
+    </div>
+
+    <div>
+      <label>Full Name</label>
+      <input formControlName="fullName" class="input" type="text" required />
+    </div>
+
+    <div>
+      <label>Blood Type</label>
+      <input formControlName="bloodType" class="input" type="text" placeholder="e.g., A+, O-" required />
+    </div>
+
+    <div>
+      <label>Allergies</label>
+      <textarea formControlName="allergies" class="input" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>Chronic Diseases</label>
+      <textarea formControlName="chronicDiseases" class="input" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>Current Medications</label>
+      <textarea formControlName="currentMedications" class="input" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>Past Surgeries</label>
+      <textarea formControlName="pastSurgeries" class="input" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>Vaccination History</label>
+      <textarea formControlName="vaccinationHistory" class="input" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>Emergency Contact Name</label>
+      <input formControlName="emergencyContactName" class="input" type="text" required />
+    </div>
+
+    <div>
+      <label>Emergency Contact Phone</label>
+      <input formControlName="emergencyContactPhone" class="input" type="tel" required />
+    </div>
+
+    <div>
+      <label>Additional Notes</label>
+      <textarea formControlName="notes" class="input" rows="2"></textarea>
+    </div>
+
+    <button type="submit" [disabled]="folderForm.invalid" class="btn w-full">Submit</button>
+  </form>
+
+  <div *ngIf="message" class="text-green-600 mt-4">{{ message }}</div>
+  <div *ngIf="error" class="text-red-600 mt-4">{{ error }}</div>
+</div>

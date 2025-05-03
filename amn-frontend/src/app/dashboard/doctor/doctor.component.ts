@@ -13,8 +13,19 @@ import { DoctorService } from 'src/app/services/doctor.service';
 export class DoctorComponent {
   cin = '';
   fullName = '';
-  medicalFolder: any = null;
+  patientProfile: any = null;
+  showManualForm = false; // ✅ declared here
   patientId: number | null = null;
+
+  manualData = {
+    bloodType: '',
+    emergencyContact: '',
+    allergies: '',
+    chronicDiseases: '',
+    hasHeartProblem: false,
+    hasSurgery: false,
+    birthDate: ''
+  };
 
   medicalRecord = {
     reason: '',
@@ -29,49 +40,61 @@ export class DoctorComponent {
 
   constructor(private doctorService: DoctorService) {}
 
-  searchPatient(cin: string, fullName: string) {
-    this.doctorService.getMedicalFolder(cin, fullName).subscribe({
-      next: (folder: any) => {
-        this.medicalFolder = folder;
-        this.patientId = folder?.patient?.id || null;
+  searchPatient() {
+    this.doctorService.getFullPatientProfile(this.cin, this.fullName).subscribe({
+      next: (profile) => {
+        this.patientProfile = profile;
+        this.showManualForm = false;
       },
       error: (err) => {
         if (err.status === 404) {
-          const confirmCreate = confirm("Dossier médical non trouvé. Voulez-vous le créer ?");
+          const confirmCreate = confirm("Patient or dossier non trouvé. Voulez-vous créer et remplir les informations ?");
           if (confirmCreate) {
-            this.doctorService.getPatientIdByCin(cin, fullName).subscribe({
-              next: (id: number) => {
+            this.doctorService.getPatientIdByCin(this.cin, this.fullName).subscribe({
+              next: (id) => {
                 this.patientId = id;
-                this.doctorService.createFolder(id).subscribe({
-                  next: (createdFolder) => {
-                    this.medicalFolder = createdFolder;
-                    alert("Dossier médical créé avec succès.");
-                  },
-                  error: () => alert("Erreur lors de la création du dossier.")
-                });
+                this.showManualForm = true;
               },
-              error: () => alert("Patient introuvable. Veuillez vérifier les informations.")
+              error: () => alert("Patient introuvable.")
             });
           }
+        } else {
+          alert("Erreur lors de la recherche du patient.");
         }
       }
     });
   }
 
-  createMedicalRecord() {
+  submitManualFolder() {
     if (!this.patientId) return;
-    this.doctorService.createMedicalRecord(this.patientId, this.medicalRecord).subscribe({
-      next: () => alert('Dossier médical ajouté avec succès'),
+
+    this.doctorService.createOrUpdateMedicalFolder(
+      this.cin,
+      this.fullName,
+      this.manualData
+    ).subscribe({
+      next: () => {
+        alert("Dossier créé et informations mises à jour.");
+        this.showManualForm = false;
+        this.searchPatient(); // Refresh after create
+      },
+      error: () => alert("Erreur lors de la création du dossier.")
+    });
+  }
+
+  createMedicalRecord() {
+    if (!this.patientProfile?.id) return;
+    this.doctorService.createMedicalRecord(this.patientProfile.id, this.medicalRecord).subscribe({
+      next: () => alert('Dossier médical ajouté'),
       error: () => alert('Erreur lors de l’ajout du dossier')
     });
   }
 
   writePrescription() {
-    if (!this.patientId) return;
-    this.doctorService.writePrescription(this.patientId, this.prescription).subscribe({
-      next: () => alert('Prescription ajoutée avec succès'),
+    if (!this.patientProfile?.id) return;
+    this.doctorService.writePrescription(this.patientProfile.id, this.prescription).subscribe({
+      next: () => alert('Prescription ajoutée'),
       error: () => alert('Erreur lors de la prescription')
     });
   }
 }
-

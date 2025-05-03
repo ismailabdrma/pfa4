@@ -1,5 +1,6 @@
 package com.amn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,6 +40,7 @@ public class MedicalRecord {
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medical_folder_id") // fixed here
+    @JoinColumn(name = "medical_folder_id")
+    @JsonIgnore// fixed here
     private MedicalFolder medicalFolder;
 }

@@ -1,0 +1,77 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Patient Profile</h2>
+
+  <div *ngIf="error" class="text-red-600">{{ error }}</div>
+  <div *ngIf="!profile && !error" class="text-gray-500">Loading profile...</div>
+
+  <div *ngIf="profile" class="space-y-6">
+    <!-- Basic Info -->
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="text-xl font-semibold mb-2">Basic Information</h3>
+      <p><strong>Full Name:</strong> {{ profile.fullName }}</p>
+      <p><strong>CIN:</strong> {{ profile.cin }}</p>
+      <p><strong>Birth Date:</strong> {{ profile.birthDate }}</p>
+      <p><strong>Blood Type:</strong> {{ profile.bloodType }}</p>
+      <p><strong>Emergency Contact:</strong> {{ profile.emergencyContact }}</p>
+    </div>
+
+    <!-- Medical Info -->
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="text-xl font-semibold mb-2">Medical Information</h3>
+      <p><strong>Allergies:</strong> {{ profile.allergies }}</p>
+      <p><strong>Chronic Diseases:</strong> {{ profile.chronicDiseases }}</p>
+      <p><strong>Heart Problem:</strong> {{ profile.hasHeartProblem ? 'Yes' : 'No' }}</p>
+      <p><strong>Past Surgery:</strong> {{ profile.hasSurgery ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Medical Records -->
+    <div class="bg-white p-4 rounded shadow" *ngIf="profile.medicalRecords?.length">
+      <h3 class="text-xl font-semibold mb-2">Medical Records</h3>
+      <ul class="list-disc pl-6">
+        <li *ngFor="let record of profile.medicalRecords">
+          <strong>{{ record.creationDate }}:</strong> {{ record.reason }} - {{ record.diagnosis }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Vaccinations -->
+    <div class="bg-white p-4 rounded shadow" *ngIf="profile.vaccinations?.length">
+      <h3 class="text-xl font-semibold mb-2">Vaccinations</h3>
+      <ul class="list-disc pl-6">
+        <li *ngFor="let v of profile.vaccinations">
+          {{ v.vaccineName }} - {{ v.date }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Visit Logs -->
+    <div class="bg-white p-4 rounded shadow" *ngIf="profile.visitLogs?.length">
+      <h3 class="text-xl font-semibold mb-2">Visit Logs</h3>
+      <ul class="list-disc pl-6">
+        <li *ngFor="let log of profile.visitLogs">
+          Visited on {{ log.date }} - Reason: {{ log.reason }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Scans -->
+    <div class="bg-white p-4 rounded shadow" *ngIf="profile.scans?.length">
+      <h3 class="text-xl font-semibold mb-2">Scans</h3>
+      <ul class="list-disc pl-6">
+        <li *ngFor="let scan of profile.scans">
+          <a [href]="scan.url" target="_blank">{{ scan.title }}</a> - {{ scan.uploadDate }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Surgeries -->
+    <div class="bg-white p-4 rounded shadow" *ngIf="profile.surgeries?.length">
+      <h3 class="text-xl font-semibold mb-2">Surgeries</h3>
+      <ul class="list-disc pl-6">
+        <li *ngFor="let surgery of profile.surgeries">
+          {{ surgery.type }} - {{ surgery.date }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

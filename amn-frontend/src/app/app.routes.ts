@@ -14,7 +14,8 @@ import { PatientComponent } from './dashboard/patient/patient.component';
 import { DoctorComponent } from './dashboard/doctor/doctor.component';
 import { PharmacistComponent } from './dashboard/pharmacist/pharmacist.component';
 import { AdminComponent } from './dashboard/admin/admin.component';
-
+import { CreateMedicalFolderComponent } from './dashboard/doctor/create-medical-folder/create-medical-folder.component';
+import { PatientProfileComponent } from './dashboard/doctor/patient-profile/patient-profile.component';
 export const routes: Routes = [
   // Default
   { path: '', redirectTo: 'select-role', pathMatch: 'full' },
@@ -34,4 +35,6 @@ export const routes: Routes = [
   { path: 'dashboard/doctor', component: DoctorComponent },
   { path: 'dashboard/pharmacist', component: PharmacistComponent },
   { path: 'dashboard/admin', component: AdminComponent },
+  { path: 'dashboard/doctor/create-folder', component: CreateMedicalFolderComponent },
+  { path: 'dashboard/doctor/patient-profile', component: PatientProfileComponent }
 ];

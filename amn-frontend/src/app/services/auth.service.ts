@@ -1,4 +1,3 @@
-// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -8,6 +7,7 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/api/auth';
+  private readonly TOKEN_KEY = 'jwt';
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -20,16 +20,16 @@ export class AuthService {
   }
 
   saveToken(token: string) {
-    localStorage.setItem('jwt', token); // ✅ Sauvegarde du token
+    localStorage.setItem(this.TOKEN_KEY, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('jwt'); // ✅ Récupération du token
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   logout() {
-    localStorage.removeItem('jwt'); // ✅ Suppression du token
-    this.router.navigate(['/login']); // ✅ Redirection
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.router.navigate(['/login']);
   }
 
   redirectToDashboard() {
@@ -41,7 +41,7 @@ export class AuthService {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const role = payload.role;
+      const role = payload.role?.replace('ROLE_', '');
 
       switch (role) {
         case 'PATIENT':
@@ -59,8 +59,8 @@ export class AuthService {
         default:
           this.router.navigate(['/login']);
       }
-    } catch (error) {
-      this.logout(); // Token mal formé → déconnexion
+    } catch (e) {
+      this.logout();
     }
   }
 }

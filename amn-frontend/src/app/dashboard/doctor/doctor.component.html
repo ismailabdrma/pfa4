@@ -1,19 +1,41 @@
 <div class="doctor-dashboard">
   <h2>Dashboard Médecin</h2>
 
-  <!-- 🔍 Patient Search -->
+  <!-- 🔍 Search patient by CIN and full name -->
   <div>
     <h3>Chercher un patient</h3>
     <input type="text" [(ngModel)]="cin" placeholder="CIN du patient" />
     <input type="text" [(ngModel)]="fullName" placeholder="Nom complet du patient" />
-    <button (click)="searchPatient(cin, fullName)">Rechercher</button>
+    <button (click)="searchPatient()">Rechercher</button>
   </div>
 
-  <!-- 📁 Medical Folder -->
-  <div *ngIf="medicalFolder">
-    <h3>Dossier Médical de {{ medicalFolder.patient.fullName }}</h3>
+  <!-- 📋 Manual Patient Info Form -->
+  <div *ngIf="showManualForm" class="manual-form">
+    <h3>Créer un dossier médical pour un nouveau patient</h3>
 
-    <!-- 📝 Create Medical Record -->
+    <input type="text" [(ngModel)]="manualData.bloodType" placeholder="Groupe sanguin" />
+    <input type="text" [(ngModel)]="manualData.emergencyContact" placeholder="Contact d'urgence" />
+    <input type="text" [(ngModel)]="manualData.allergies" placeholder="Allergies" />
+    <input type="text" [(ngModel)]="manualData.chronicDiseases" placeholder="Maladies chroniques" />
+    <input type="date" [(ngModel)]="manualData.birthDate" placeholder="Date de naissance" />
+
+    <label>
+      Problèmes cardiaques:
+      <input type="checkbox" [(ngModel)]="manualData.hasHeartProblem" />
+    </label>
+    <label>
+      Chirurgies antérieures:
+      <input type="checkbox" [(ngModel)]="manualData.hasSurgery" />
+    </label>
+
+    <button (click)="submitManualFolder()">Soumettre</button>
+  </div>
+
+  <!-- 📁 Show full patient profile -->
+  <div *ngIf="patientProfile">
+    <h3>Dossier Médical de {{ patientProfile.fullName }}</h3>
+
+    <!-- 📝 Ajouter un dossier médical -->
     <div>
       <h4>Ajouter un dossier médical</h4>
       <input type="text" [(ngModel)]="medicalRecord.reason" placeholder="Motif" />
@@ -22,7 +44,7 @@
       <button (click)="createMedicalRecord()">Ajouter</button>
     </div>
 
-    <!-- 💊 Write Prescription -->
+    <!-- 💊 Prescrire un traitement -->
     <div>
       <h4>Prescrire un traitement</h4>
       <input type="text" [(ngModel)]="prescription.medicines" placeholder="Médicaments" />

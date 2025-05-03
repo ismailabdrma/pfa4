@@ -1,5 +1,6 @@
 package com.amn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -24,5 +25,6 @@ public class Vaccination {
 
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
+    @JsonIgnore
     private MedicalFolder medicalFolder;
 }
