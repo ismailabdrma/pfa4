@@ -1,10 +1,12 @@
 package com.amn.entity;
 
+import com.amn.entity.enums.FileType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,7 +24,11 @@ public class Scan {
     private String type; // For example: "Scan"
     private String description;
     private String url;
-    private LocalDateTime uploadDate;
+    private LocalDate uploadDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "file_type")
+    private FileType fileType;
 
 
     @ManyToOne

@@ -1,14 +1,16 @@
 package com.amn.controller;
 
 import com.amn.dto.PatientProfileDTO;
-import com.amn.entity.MedicalFolder;
-import com.amn.entity.MedicalRecord;
-import com.amn.entity.Prescription;
+import com.amn.entity.*;
 import com.amn.service.DoctorService;
+import com.amn.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -18,7 +20,9 @@ import java.util.Map;
 public class DoctorController {
 
     private final DoctorService doctorService;
+    private final FileStorageService fileStorageService;
 
+    // ✅ Retrieve medical folder by patient info
     @GetMapping("/folder")
     public ResponseEntity<MedicalFolder> getPatientFolder(
             @RequestParam String cin,
@@ -29,6 +33,7 @@ public class DoctorController {
         );
     }
 
+    // ✅ Add new medical record
     @PostMapping("/add-record/{patientId}")
     public ResponseEntity<MedicalRecord> createMedicalRecord(
             @PathVariable Long patientId,
@@ -39,6 +44,7 @@ public class DoctorController {
         );
     }
 
+    // ✅ Add prescription
     @PostMapping("/prescribe/{patientId}")
     public ResponseEntity<Prescription> writePrescription(
             @PathVariable Long patientId,
@@ -49,14 +55,18 @@ public class DoctorController {
         );
     }
 
+    // ✅ Get patient ID from CIN + name
     @GetMapping("/get-id")
-    public ResponseEntity<Long> getPatientId(@RequestParam String cin, @RequestParam String fullName) {
+    public ResponseEntity<Long> getPatientId(
+            @RequestParam String cin,
+            @RequestParam String fullName
+    ) {
         return ResponseEntity.ok(
                 doctorService.getPatientIdByCinAndName(cin, fullName)
         );
     }
 
-    // ✅ Create folder with full patient details
+    // ✅ Create folder and update patient info
     @PostMapping("/create-folder/{cin}")
     public ResponseEntity<?> createFolderWithDetails(
             @PathVariable String cin,
@@ -64,14 +74,11 @@ public class DoctorController {
             @RequestBody Map<String, String> body
     ) {
         Long patientId = doctorService.getPatientIdByCinAndName(cin, fullName);
-
-        // Doctor fills missing data here (patient update logic happens inside service)
         doctorService.createOrUpdateFolderWithPatientDetails(patientId, body);
-
         return ResponseEntity.ok().build();
     }
 
-    // ✅ Full Profile DTO (for Angular profile view)
+    // ✅ Get full profile for display
     @GetMapping("/full-profile")
     public ResponseEntity<PatientProfileDTO> getFullPatientProfile(
             @RequestParam String cin,
@@ -80,5 +87,98 @@ public class DoctorController {
         return ResponseEntity.ok(
                 doctorService.getFullPatientProfile(cin, fullName)
         );
+    }
+
+    // ✅ Upload SCAN (link-based)
+    @PostMapping("/upload-scan")
+    public ResponseEntity<Scan> uploadScanLink(
+            @RequestBody Scan scan,
+            @RequestParam Long folderId
+    ) {
+        return ResponseEntity.ok(fileStorageService.saveScanFromLink(scan, folderId));
+    }
+
+    // ✅ Upload SCAN (file-based)
+    @PostMapping("/upload-scan-file")
+    public ResponseEntity<Scan> uploadScanFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadScanLocally(file, title, description, folderId));
+    }
+
+    // ✅ Upload ANALYSIS (file-based)
+    @PostMapping("/upload-analysis")
+    public ResponseEntity<Analysis> uploadAnalysis(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadAnalysisLocally(file, title, description, folderId));
+    }
+
+    // ✅ Upload SURGERY (file optional)
+    @PostMapping("/upload-surgery")
+    public ResponseEntity<Surgery> uploadSurgery(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadSurgeryLocally(file, title, description, folderId));
+    }
+
+    @PostMapping("/add-vaccination")
+    public ResponseEntity<Vaccination> addVaccination(
+            @RequestParam String vaccineName,
+            @RequestParam int doseNumber,
+            @RequestParam String manufacturer,
+            @RequestParam String date,
+            @RequestParam Long folderId
+    ) {
+        LocalDate vaccinationDate = LocalDate.parse(date);
+        return ResponseEntity.ok(
+                doctorService.addVaccinationRecord(folderId, vaccineName, doseNumber, manufacturer, vaccinationDate)
+        );
+    }
+
+
+    // ✅ View SCAN by ID
+    @GetMapping("/scan/{id}")
+    public ResponseEntity<Scan> getScanById(@PathVariable Long id) {
+        return ResponseEntity.ok(fileStorageService.getScanById(id));
+    }
+
+    // ✅ View ANALYSIS by ID
+    @GetMapping("/analysis/{id}")
+    public ResponseEntity<Analysis> getAnalysisById(@PathVariable Long id) {
+        return ResponseEntity.ok(fileStorageService.getAnalysisById(id));
+    }
+
+    // ✅ View SURGERY by ID
+    @GetMapping("/surgery/{id}")
+    public ResponseEntity<Surgery> getSurgeryById(@PathVariable Long id) {
+        return ResponseEntity.ok(fileStorageService.getSurgeryById(id));
+    }
+
+    // ✅ List all scans by folder
+    @GetMapping("/scans")
+    public ResponseEntity<List<Scan>> getScansByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(fileStorageService.getScansByFolderId(folderId));
+    }
+
+    // ✅ List all analyses by folder
+    @GetMapping("/analyses")
+    public ResponseEntity<List<Analysis>> getAnalysesByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(fileStorageService.getAnalysesByFolderId(folderId));
+    }
+
+    // ✅ List all surgeries by folder
+    @GetMapping("/surgeries")
+    public ResponseEntity<List<Surgery>> getSurgeriesByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(fileStorageService.getSurgeriesByFolderId(folderId));
     }
 }

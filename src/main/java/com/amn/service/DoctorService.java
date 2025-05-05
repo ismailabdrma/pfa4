@@ -2,11 +2,15 @@ package com.amn.service;
 
 import com.amn.dto.PatientProfileDTO;
 import com.amn.entity.*;
+import com.amn.entity.enums.FileType;
 import com.amn.entity.enums.OTPStatus;
 import com.amn.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +27,12 @@ public class DoctorService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final OTPRepository otpRepository;
+    private final ScanRepository scanRepository;
+    private final AnalysisRepository analysisRepository;
+    private final SurgeryRepository surgeryRepository;
+    private final VaccinationRepository vaccinationRepository;
+
+
 
     public Optional<Doctor> login(String email, String password) {
         return doctorRepository.findByEmail(email)
@@ -56,7 +66,7 @@ public class DoctorService {
 
     public MedicalRecord createMedicalRecord(Long patientId, MedicalRecord record) {
         MedicalFolder folder = medicalFolderRepository.findByPatientId(patientId)
-                .orElseThrow(() -> new RuntimeException("MedicalFolder not found"));
+                .orElseThrow(() -> new RuntimeException("Medical folder not found"));
 
         record.setCreationDate(LocalDate.now());
         record.setMedicalFolder(folder);
@@ -78,13 +88,14 @@ public class DoctorService {
         Patient patient = patientRepository.findAllByCin(cin).stream()
                 .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Patient not found or name does not match"));
+                .orElseThrow(() -> new RuntimeException("Patient not found or name mismatch"));
 
         return medicalFolderRepository.findByPatientId(patient.getId())
                 .orElseGet(() -> {
-                    MedicalFolder folder = new MedicalFolder();
-                    folder.setPatient(patient);
-                    return medicalFolderRepository.save(folder);
+                    MedicalFolder newFolder = new MedicalFolder();
+                    newFolder.setPatient(patient);
+                    newFolder.setCreationDate(LocalDate.now());
+                    return medicalFolderRepository.save(newFolder);
                 });
     }
 
@@ -92,7 +103,7 @@ public class DoctorService {
         Patient patient = patientRepository.findAllByCin(cin).stream()
                 .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Patient not found or name does not match"));
+                .orElseThrow(() -> new RuntimeException("Patient not found or name mismatch"));
 
         return prescriptionRepository.findAllByPatientId(patient.getId());
     }
@@ -102,11 +113,12 @@ public class DoctorService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         if (medicalFolderRepository.findByPatientId(patientId).isPresent()) {
-            throw new RuntimeException("Medical folder already exists for this patient.");
+            throw new RuntimeException("Medical folder already exists");
         }
 
         MedicalFolder folder = new MedicalFolder();
         folder.setPatient(patient);
+        folder.setCreationDate(LocalDate.now());
         return medicalFolderRepository.save(folder);
     }
 
@@ -127,6 +139,7 @@ public class DoctorService {
         }
 
         folderData.setPatient(patient);
+        folderData.setCreationDate(LocalDate.now());
         return medicalFolderRepository.save(folderData);
     }
 
@@ -159,12 +172,19 @@ public class DoctorService {
         Patient patient = patientRepository.findAllByCin(cin).stream()
                 .filter(p -> p.getFullName().equalsIgnoreCase(fullName))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Patient not found or name does not match"));
+                .orElseThrow(() -> new RuntimeException("Patient not found or name mismatch"));
 
+        // 🛠️ Auto-create folder if it doesn't exist
         MedicalFolder folder = medicalFolderRepository.findByPatientId(patient.getId())
-                .orElseThrow(() -> new RuntimeException("Medical folder not found"));
+                .orElseGet(() -> {
+                    MedicalFolder newFolder = new MedicalFolder();
+                    newFolder.setPatient(patient);
+                    newFolder.setCreationDate(LocalDate.now());
+                    return medicalFolderRepository.save(newFolder);
+                });
 
         return PatientProfileDTO.builder()
+                .id(patient.getId())
                 .fullName(patient.getFullName())
                 .cin(patient.getCin())
                 .bloodType(patient.getBloodType())
@@ -175,10 +195,124 @@ public class DoctorService {
                 .hasHeartProblem(patient.isHasHeartProblem())
                 .hasSurgery(patient.isHasSurgery())
                 .medicalRecords(folder.getMedicalRecords())
-                .vaccinations(folder.getVaccinations())
+                .vaccinations(vaccinationRepository.findAllByMedicalFolderId(folder.getId()))
                 .visitLogs(folder.getVisitLogs())
-                .scans(folder.getScans())
-                .surgeries(folder.getSurgeries())
+                .scans(scanRepository.findAllByMedicalFolderId(folder.getId()))
+                .surgeries(surgeryRepository.findAllByMedicalFolderId(folder.getId()))
+                .email(patient.getEmail())
+                .analyses(analysisRepository.findAllByMedicalFolderId(folder.getId()))// ✅ add this
+                .phone(patient.getPhone())
+                .prescriptions(prescriptionRepository.findAllByPatientId(patient.getId()))// ✅ add this
+                .address(patient.getAddress())
+                .medicalFolderId(folder.getId())  // ✅ Add this to the builder
                 .build();
     }
+
+    public Scan uploadScanLocally(MultipartFile file, String title, String description, Long folderId) {
+        try {
+            String uploadDir = "C:/amn/uploads/scans/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            file.transferTo(dest);
+
+            MedicalFolder folder = medicalFolderRepository.findById(folderId)
+                    .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+            Scan scan = Scan.builder()
+                    .title(title)
+                    .description(description)
+                    .uploadDate(LocalDate.now())
+                    .fileType(FileType.SCAN)
+                    .url("/uploads/scans/" + fileName)
+                    .medicalFolder(folder)
+                    .build();
+
+            return scanRepository.save(scan);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement du fichier", e);
+        }
+    }
+
+    public Analysis uploadAnalysisLocally(MultipartFile file, String title, String description, Long folderId) {
+        try {
+            String uploadDir = "C:/amn/uploads/analyses/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            file.transferTo(dest);
+
+            MedicalFolder folder = medicalFolderRepository.findById(folderId)
+                    .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+            Analysis analysis = Analysis.builder()
+                    .title(title)
+                    .description(description)
+                    .uploadDate(LocalDate.now())
+                    .fileType(FileType.ANALYSIS)
+                    .url("/uploads/analyses/" + fileName)
+                    .medicalFolder(folder)
+                    .build();
+
+            return analysisRepository.save(analysis);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement du fichier", e);
+        }
+    }
+
+    public Surgery uploadSurgeryLocally(MultipartFile file, String title, String description, Long folderId) {
+        try {
+            String uploadDir = "C:/amn/uploads/surgeries/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
+
+            String fileName = file != null ? (System.currentTimeMillis() + "_" + file.getOriginalFilename()) : null;
+            if (file != null) {
+                File dest = new File(uploadDir + fileName);
+                file.transferTo(dest);
+            }
+
+            MedicalFolder folder = medicalFolderRepository.findById(folderId)
+                    .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+            Surgery surgery = Surgery.builder()
+                    .title(title)
+                    .description(description)
+                    .type("Surgery") // default or pass as param if needed
+                    .uploadDate(LocalDate.now())
+                    .fileType(FileType.SURGERY)
+                    .url(fileName != null ? "/uploads/surgeries/" + fileName : null)
+                    .medicalFolder(folder)
+                    .build();
+
+            return surgeryRepository.save(surgery);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement du fichier", e);
+        }
+    }
+    public Vaccination addVaccinationRecord(Long folderId, String vaccineName, int doseNumber, String manufacturer, LocalDate vaccinationDate) {
+        MedicalFolder folder = medicalFolderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+        Vaccination vaccination = Vaccination.builder()
+                .vaccineName(vaccineName)
+                .doseNumber(doseNumber)
+                .manufacturer(manufacturer)
+                .vaccinationDate(vaccinationDate)
+                .medicalFolder(folder)
+                .build();
+
+        return vaccinationRepository.save(vaccination);
+    }
+
+
+
+
+
+
+
 }

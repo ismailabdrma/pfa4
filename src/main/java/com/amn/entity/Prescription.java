@@ -42,4 +42,8 @@ public class Prescription {
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private Doctor prescribingDoctor;
+    @ManyToOne
+    @JoinColumn(name = "medical_folder_id")
+    private MedicalFolder medicalFolder;
+
 }

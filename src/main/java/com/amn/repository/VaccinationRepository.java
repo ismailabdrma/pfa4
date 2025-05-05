@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface VaccinationRepository extends JpaRepository<Vaccination, Long> {
-    List<Vaccination> findByMedicalFolder_Id(Long folderId);  // <-- add underscore _
+    List<Vaccination> findByMedicalFolder_Id(Long folderId);
+    List<Vaccination> findAllByMedicalFolderId(Long folderId);
+// <-- add underscore _
 }

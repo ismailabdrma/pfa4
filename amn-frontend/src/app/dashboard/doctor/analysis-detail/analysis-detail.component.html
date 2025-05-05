@@ -1,0 +1,15 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Détails de l'analyse</h2>
+  <div *ngIf="error" class="text-red-600">{{ error }}</div>
+  <div *ngIf="!analysis && !error" class="text-gray-500">Chargement...</div>
+  <div *ngIf="analysis" class="space-y-4 bg-white p-4 rounded shadow">
+    <p><strong>Titre:</strong> {{ analysis.title }}</p>
+    <p><strong>Description:</strong> {{ analysis.description }}</p>
+    <p><strong>Date:</strong> {{ analysis.uploadDate }}</p>
+    <p><strong>Type:</strong> {{ analysis.fileType }}</p>
+    <div *ngIf="analysis.url">
+      <h4 class="font-semibold">Fichier:</h4>
+      <img [src]="analysis.url" alt="Image" class="max-w-full rounded border" />
+    </div>
+  </div>
+</div>

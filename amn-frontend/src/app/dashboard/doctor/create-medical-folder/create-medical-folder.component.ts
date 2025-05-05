@@ -35,7 +35,7 @@ export class CreateMedicalFolderComponent {
   onSubmit(): void {
     const folderData = this.folderForm.value;
 
-    this.doctorService.createMedicalFolder(folderData.cin, folderData.fullName, folderData).subscribe({
+    this.doctorService.createOrUpdateMedicalFolder(folderData.cin, folderData.fullName, folderData).subscribe({
       next: () => {
         this.message = '✅ Dossier médical créé avec succès.';
         this.error = null;

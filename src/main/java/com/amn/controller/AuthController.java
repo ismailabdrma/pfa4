@@ -1,12 +1,16 @@
+// ✅ AuthController.java (Final, with OTP and real email sending)
 package com.amn.controller;
 
 import com.amn.dto.AuthRequest;
 import com.amn.dto.AuthResponse;
 import com.amn.dto.RegisterRequest;
 import com.amn.entity.*;
+import com.amn.entity.enums.OTPStatus;
 import com.amn.entity.enums.Role;
+import com.amn.repository.OTPRepository;
 import com.amn.repository.UserRepository;
 import com.amn.security.JwtService;
+import com.amn.service.OTPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +34,11 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OTPService otpService;
+    private final OTPRepository otpRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<String> login(@RequestBody AuthRequest request) {
         try {
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -46,10 +53,30 @@ public class AuthController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        otpService.sendOtpToUser(user); // 📩 Send real email
+
+        return ResponseEntity.ok("OTP sent to your email. Please verify.");
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<AuthResponse> verifyOtp(@RequestParam String email, @RequestParam String otpCode) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        OTP otp = otpRepository.findTopByUserIdOrderByExpirationDesc(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP not found"));
+
+        if (!otp.getCode().equals(otpCode) || otp.getExpiration().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or expired OTP");
+        }
+
+        otp.setStatus(OTPStatus.VERIFIED);
+        otpRepository.save(otp);
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
-
         String token = jwtService.generateToken(claims, user.getEmail());
+
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
@@ -74,7 +101,6 @@ public class AuthController {
                         .matricule(request.getMatricule())
                         .build();
                 break;
-
             case PHARMACIST:
                 user = Pharmacist.builder()
                         .fullName(request.getName())
@@ -85,7 +111,6 @@ public class AuthController {
                         .matricule(request.getMatricule())
                         .build();
                 break;
-
             case PATIENT:
                 user = Patient.builder()
                         .fullName(request.getName())
@@ -99,8 +124,8 @@ public class AuthController {
                         .emergencyContact(request.getEmergencyContact())
                         .allergies(request.getAllergies())
                         .chronicDiseases(request.getChronicDiseases())
-                        .hasHeartProblem(request.getHasHeartProblem())
-                        .hasSurgery(request.getHasSurgery())
+                        .hasHeartProblem(Boolean.TRUE.equals(request.getHasHeartProblem()))
+                        .hasSurgery(Boolean.TRUE.equals(request.getHasSurgery()))
                         .build();
                 break;
 

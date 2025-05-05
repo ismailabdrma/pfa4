@@ -26,13 +26,14 @@ public class OTP {
     private OTPStatus status;
 
     // Relationship with Patient
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
+
     @Enumerated(EnumType.STRING)
     private OTPChannel channel;
     // Relationship with Doctor who generated this OTP
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private Doctor generatedBy;
+    @JoinColumn(name = "user_id")
+    private User user;
+    @ManyToOne
+    private Patient patient; //
+
 }

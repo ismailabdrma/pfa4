@@ -1,4 +1,4 @@
-package com.amn.nosql;
+package com.amn.nosql.document;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class AnalysisDocument {
     @Id
     private String id;
-
     private String fileUrl;
     private String analysisType;
     private String patientCin;

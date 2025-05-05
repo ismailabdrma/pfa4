@@ -1,0 +1,15 @@
+<div class="container max-w-xl mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Upload Scan (Link-based)</h2>
+
+  <form [formGroup]="scanForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <input formControlName="title" placeholder="Titre du scan" class="border p-2 w-full" />
+    <textarea formControlName="description" placeholder="Description" class="border p-2 w-full"></textarea>
+    <input formControlName="uploadDate" type="date" class="border p-2 w-full" />
+    <input formControlName="url" placeholder="Lien du fichier (Cloudinary, etc)" class="border p-2 w-full" />
+    <input formControlName="folderId" placeholder="ID du dossier médical" class="border p-2 w-full" />
+    <button type="submit" [disabled]="scanForm.invalid" class="bg-blue-600 text-white px-4 py-2 rounded">Uploader</button>
+  </form>
+
+  <div *ngIf="message" class="text-green-600 mt-2">{{ message }}</div>
+  <div *ngIf="error" class="text-red-600 mt-2">{{ error }}</div>
+</div>

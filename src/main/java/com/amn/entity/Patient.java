@@ -36,4 +36,7 @@ public class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Medication> medications;
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<OTP> otps;
+
 }

@@ -1,42 +1,43 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Needed for *ngIf
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  loginForm!: FormGroup;
-  errorMessage: string = '';
+  loginForm: FormGroup;
+  errorMessage = '';
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
-      email: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.invalid) return;
 
-    const loginData = {
-      email: this.loginForm.value.email || '',
-      password: this.loginForm.value.password || ''
-    };
+    const loginData = this.loginForm.value;
 
     this.authService.login(loginData).subscribe({
-      next: (res: any) => {
-        this.authService.saveToken(res.token);
-        this.authService.redirectToDashboard();
+      next: () => {
+        this.authService.setPendingEmail(loginData.email);
+        this.router.navigate(['/verify-otp']);
       },
       error: () => {
-        this.errorMessage = 'Login failed. Please check your credentials.';
+        this.errorMessage = 'Email ou mot de passe invalide.';
       }
     });
   }

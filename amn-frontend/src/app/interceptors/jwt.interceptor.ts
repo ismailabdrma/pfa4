@@ -1,14 +1,13 @@
-import { inject, Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpInterceptorFn,
   HttpRequest,
   HttpHandlerFn
 } from '@angular/common/http';
+export const JwtInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('auth_token');
 
-export const JwtInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
-  const token = localStorage.getItem('jwt');
-
-  if (token) {
+  if (token && token.split('.').length === 3) {
     const cloned = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
@@ -19,3 +18,4 @@ export const JwtInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: H
 
   return next(req);
 };
+

@@ -8,6 +8,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { RegisterPatientComponent } from './auth/register-patient/register-patient.component';
 import { RegisterProfessionalComponent } from './auth/register-professional/register-professional.component';
+import { VerifyOtpComponent } from './auth/verify-otp/verify-otp.component';
 
 // Dashboards
 import { PatientComponent } from './dashboard/patient/patient.component';
@@ -16,6 +17,9 @@ import { PharmacistComponent } from './dashboard/pharmacist/pharmacist.component
 import { AdminComponent } from './dashboard/admin/admin.component';
 import { CreateMedicalFolderComponent } from './dashboard/doctor/create-medical-folder/create-medical-folder.component';
 import { PatientProfileComponent } from './dashboard/doctor/patient-profile/patient-profile.component';
+import { UploadScanComponent } from './dashboard/doctor/upload-scan.component';
+import { ScanDetailComponent } from './dashboard/doctor/scan-detail/scan-detail.component';
+import { SurgeryDetailComponent } from './dashboard/doctor/surgery-detail/surgery-detail.component';
 export const routes: Routes = [
   // Default
   { path: '', redirectTo: 'select-role', pathMatch: 'full' },
@@ -26,6 +30,7 @@ export const routes: Routes = [
 
   // Auth pages
   { path: 'login', component: LoginComponent },
+  { path: 'verify-otp', component: VerifyOtpComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'register/patient', component: RegisterPatientComponent },
   { path: 'register/professional', component: RegisterProfessionalComponent },
@@ -36,5 +41,8 @@ export const routes: Routes = [
   { path: 'dashboard/pharmacist', component: PharmacistComponent },
   { path: 'dashboard/admin', component: AdminComponent },
   { path: 'dashboard/doctor/create-folder', component: CreateMedicalFolderComponent },
-  { path: 'dashboard/doctor/patient-profile', component: PatientProfileComponent }
+  { path: 'dashboard/doctor/patient-profile', component: PatientProfileComponent },
+  {path: 'dashboard/doctor/upload-scan', component: UploadScanComponent },
+  { path: 'dashboard/doctor/scan/:scanId', component: ScanDetailComponent },
+  { path: 'dashboard/doctor/surgery/:surgeryId', component: SurgeryDetailComponent},
 ];

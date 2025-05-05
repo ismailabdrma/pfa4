@@ -8,6 +8,7 @@ export class DoctorService {
 
   constructor(private http: HttpClient) {}
 
+  // --- 🔐 Helper: Get JWT headers ---
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('jwt');
     return new HttpHeaders({
@@ -15,8 +16,10 @@ export class DoctorService {
     });
   }
 
-  getMedicalFolder(cin: string, fullName: string): Observable<any> {
-    return this.http.get(`${this.API_URL}/folder`, {
+  // --- 🧍‍♂️ Patient Management ---
+
+  getFullPatientProfile(cin: string, fullName: string): Observable<any> {
+    return this.http.get(`${this.API_URL}/full-profile`, {
       headers: this.getHeaders(),
       params: { cin, fullName }
     });
@@ -29,11 +32,13 @@ export class DoctorService {
     });
   }
 
-  createFolder(cin: string, fullName: string, folderData: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/create-folder/${cin}?fullName=${fullName}`, folderData, {
+  createOrUpdateMedicalFolder(cin: string, fullName: string, patientData: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/create-folder/${cin}?fullName=${fullName}`, patientData, {
       headers: this.getHeaders()
     });
   }
+
+  // --- 📋 Medical Records & Prescriptions ---
 
   createMedicalRecord(patientId: number, record: any): Observable<any> {
     return this.http.post(`${this.API_URL}/add-record/${patientId}`, record, {
@@ -46,23 +51,89 @@ export class DoctorService {
       headers: this.getHeaders()
     });
   }
-  getFullPatientProfile(cin: string, fullName: string): Observable<any> {
-    return this.http.get(`${this.API_URL}/full-profile`, {
+
+  // --- 💉 Vaccination ---
+
+  addVaccination(
+    folderId: number,
+    vaccineName: string,
+    doseNumber: number,
+    manufacturer: string,
+    date: string
+  ): Observable<any> {
+    const params = {
+      folderId,
+      name: vaccineName,
+      dose: doseNumber,
+      manufacturer,
+      date
+    };
+    return this.http.post(`${this.API_URL}/add-vaccination`, null, {
       headers: this.getHeaders(),
-      params: { cin, fullName }
+      params
     });
   }
-  createMedicalFolder(cin: string, fullName: string, folderData: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/create-folder/${cin}?fullName=${fullName}`, folderData, {
+
+  // --- 📎 Upload Files (Multipart FormData) ---
+
+  uploadScan(data: FormData, folderId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/upload-scan-file?folderId=${folderId}`, data, {
+      headers: this.getHeaders().delete('Content-Type') // Let browser set boundary
+    });
+  }
+
+  uploadAnalysis(data: FormData, folderId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/upload-analysis?folderId=${folderId}`, data, {
+      headers: this.getHeaders().delete('Content-Type')
+    });
+  }
+
+  uploadSurgery(data: FormData, folderId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/upload-surgery?folderId=${folderId}`, data, {
+      headers: this.getHeaders().delete('Content-Type')
+    });
+  }
+
+  // --- 🔍 View Files by ID ---
+
+  getScanById(id: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/scan/${id}`, {
       headers: this.getHeaders()
     });
   }
-  createOrUpdateMedicalFolder(cin: string, fullName: string, patientData: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/create-folder/${cin}?fullName=${fullName}`, patientData, {
+
+  getAnalysisById(id: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/analysis/${id}`, {
       headers: this.getHeaders()
     });
   }
 
+  getSurgeryById(id: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/surgery/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
 
+  // --- 📂 List Files by Folder ---
 
+  getScansByFolder(folderId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/scans`, {
+      headers: this.getHeaders(),
+      params: { folderId }
+    });
+  }
+
+  getAnalysesByFolder(folderId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/analyses`, {
+      headers: this.getHeaders(),
+      params: { folderId }
+    });
+  }
+
+  getSurgeriesByFolder(folderId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/surgeries`, {
+      headers: this.getHeaders(),
+      params: { folderId }
+    });
+  }
 }

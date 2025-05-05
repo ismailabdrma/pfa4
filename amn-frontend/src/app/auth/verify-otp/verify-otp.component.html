@@ -1,0 +1,12 @@
+<div class="otp-container">
+  <h2>Vérification OTP</h2>
+
+  <form [formGroup]="otpForm" (ngSubmit)="onSubmit()">
+    <label for="otpCode">Entrez le code reçu :</label>
+    <input id="otpCode" type="text" formControlName="otpCode" maxlength="6" />
+
+    <button type="submit" [disabled]="otpForm.invalid">Vérifier</button>
+  </form>
+
+  <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+</div>

@@ -1,11 +1,11 @@
 package com.amn.service;
 
 import com.amn.entity.OTP;
-import com.amn.entity.Patient;
+import com.amn.entity.User;
 import com.amn.entity.enums.OTPChannel;
 import com.amn.entity.enums.OTPStatus;
 import com.amn.repository.OTPRepository;
-import com.amn.repository.PatientRepository;
+import com.amn.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +18,13 @@ import java.util.Random;
 public class OTPService {
 
     private final OTPRepository otpRepository;
-    private final PatientRepository patientRepository;
+    private final UserRepository userRepository;
+    private final MailService mailService; // ✅ Inject the mail service
 
-    // Generate a new OTP
-    public OTP generateOtp(Long patientId, OTPChannel channel) {
-        Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+    // ✅ Generate and send OTP via email
+    public OTP generateOtpForUser(Long userId, OTPChannel channel) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String code = String.valueOf(new Random().nextInt(900000) + 100000);
 
@@ -32,15 +33,19 @@ public class OTPService {
                 .expiration(LocalDateTime.now().plusMinutes(5))
                 .status(OTPStatus.PENDING)
                 .channel(channel)
-                .patient(patient)
+                .user(user)
                 .build();
 
-        return otpRepository.save(otp);
+        otpRepository.save(otp);
+
+        // ✅ Send OTP via email
+        mailService.sendOtpEmail(user.getEmail(), code);
+
+        return otp;
     }
 
-    // Verify an OTP
-    public boolean verifyOtp(Long patientId, String code) {
-        Optional<OTP> latestOtpOpt = otpRepository.findTopByPatientIdOrderByExpirationDesc(patientId);
+    public boolean verifyOtp(Long userId, String code) {
+        Optional<OTP> latestOtpOpt = otpRepository.findTopByUserIdOrderByExpirationDesc(userId);
 
         if (latestOtpOpt.isEmpty()) {
             throw new RuntimeException("OTP not found");
@@ -58,4 +63,9 @@ public class OTPService {
             return false;
         }
     }
+    public void sendOtpToUser(User user) {
+        generateOtpForUser(user.getId(), OTPChannel.EMAIL);
+    }
+
+
 }

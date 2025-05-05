@@ -23,6 +23,7 @@ public class Vaccination {
     private String manufacturer;
     private LocalDate vaccinationDate;
 
+
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
     @JsonIgnore

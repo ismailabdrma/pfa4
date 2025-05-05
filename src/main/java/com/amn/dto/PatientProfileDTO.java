@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientProfileDTO {
-
+    private Long id;
     private String fullName;
     private String cin;
     private String bloodType;
@@ -24,11 +24,18 @@ public class PatientProfileDTO {
     private String chronicDiseases;
     private boolean hasHeartProblem;
     private boolean hasSurgery;
+    private String email;
+    private String phone;
+    private String address;
+
+    private Long medicalFolderId; // ✅ Add this line
 
     // Medical folder contents
-    private List<MedicalRecord> medicalRecords; // Appointments = visits
+    private List<MedicalRecord> medicalRecords;
     private List<Vaccination> vaccinations;
     private List<VisitLog> visitLogs;
     private List<Scan> scans;
     private List<Surgery> surgeries;
+    private List<Prescription> prescriptions;
+    private List<Analysis> analyses;
 }

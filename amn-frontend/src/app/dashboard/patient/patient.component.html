@@ -1,9 +1,56 @@
 <h2>Bienvenue, {{ profile?.fullName }}</h2>
 
 <div *ngIf="profile">
-  <p><strong>Email :</strong> {{ profile.email }}</p>
-  <p><strong>Téléphone :</strong> {{ profile.phone }}</p>
-  <p><strong>Adresse :</strong> {{ profile.address || 'Non renseignée' }}</p>
+  <p><strong>CIN :</strong> {{ profile.cin }}</p>
+  <p><strong>Date de naissance :</strong> {{ profile.birthDate }}</p>
   <p><strong>Groupe Sanguin :</strong> {{ profile.bloodType }}</p>
-  <p><strong>Maladies chroniques :</strong> {{ profile.chronicDiseases }}</p>
+  <p><strong>Contact d'urgence :</strong> {{ profile.emergencyContact || 'Non renseigné' }}</p>
+  <p><strong>Allergies :</strong> {{ profile.allergies || 'Non renseignées' }}</p>
+  <p><strong>Maladies chroniques :</strong> {{ profile.chronicDiseases || 'Aucune' }}</p>
+  <p><strong>Problèmes cardiaques :</strong> {{ profile.hasHeartProblem ? 'Oui' : 'Non' }}</p>
+  <p><strong>Antécédents chirurgicaux :</strong> {{ profile.hasSurgery ? 'Oui' : 'Non' }}</p>
 </div>
+
+<!-- Medical Records -->
+<div *ngIf="profile.medicalRecords?.length">
+  <h3>Consultations médicales :</h3>
+  <ul>
+    <li *ngFor="let record of profile.medicalRecords">
+      {{ record.title }} - {{ record.date }}
+    </li>
+  </ul>
+</div>
+
+<!-- Prescriptions -->
+<div *ngIf="profile.prescriptions?.length">
+  <h3>Ordonnances :</h3>
+  <ul>
+    <li *ngFor="let p of profile.prescriptions">
+      {{ p.medicationName }} - {{ p.dosage }} - {{ p.date }}
+    </li>
+  </ul>
+</div>
+
+<!-- Scans -->
+<div *ngIf="profile.scans?.length">
+  <h3>Scans :</h3>
+  <ul>
+    <li *ngFor="let s of profile.scans">
+      <a [href]="s.url" target="_blank">{{ s.title }} - {{ s.uploadDate }}</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Surgeries -->
+<div *ngIf="profile.surgeries?.length">
+  <h3>Chirurgies :</h3>
+  <ul>
+    <li *ngFor="let surgery of profile.surgeries">
+      {{ surgery.title }} - {{ surgery.date }}
+    </li>
+  </ul>
+</div>
+
+<p style="margin-top: 1rem; font-style: italic; color: gray;">
+  Pour toute interprétation médicale, veuillez contacter votre médecin traitant.
+</p>

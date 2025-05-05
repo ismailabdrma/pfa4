@@ -1,6 +1,11 @@
 package com.amn.service;
 
-import com.amn.nosql.*;
+import com.amn.nosql.document.AnalysisDocument;
+import com.amn.nosql.document.ScanDocument;
+import com.amn.nosql.repository.ScanDocumentRepository;
+import com.amn.nosql.repository.SurgeryDocumentRepository;
+import com.amn.nosql.document.SurgeryDocument;
+import com.amn.nosql.repository.AnalysisDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

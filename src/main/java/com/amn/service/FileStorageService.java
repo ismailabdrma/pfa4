@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class FileStorageService {
 
         Analysis analysis = Analysis.builder()
                 .type(type)
-                .uploadDate(LocalDateTime.now())
+                .uploadDate(LocalDate.from(LocalDateTime.now()))
                 .url(fileUrl)
                 .medicalFolder(folder)
                 .build();
@@ -75,4 +77,49 @@ public class FileStorageService {
         return medicalFolderRepository.findById(folderId)
                 .orElseThrow(() -> new RuntimeException("Medical Folder not found"));
     }
+    public Scan saveScanFromLink(Scan scan, Long folderId) {
+        scan.setMedicalFolder(findFolder(folderId));
+        scan.setUploadDate(LocalDate.from(LocalDateTime.now()));
+        return scanRepository.save(scan);
+    }
+
+    public Analysis saveAnalysisFromLink(Analysis analysis, Long folderId) {
+        analysis.setMedicalFolder(findFolder(folderId));
+        analysis.setUploadDate(LocalDate.from(LocalDateTime.now()));
+        return analysisRepository.save(analysis);
+    }
+
+    public Surgery saveSurgeryFromLink(Surgery surgery, Long folderId) {
+        surgery.setMedicalFolder(findFolder(folderId));
+        surgery.setUploadDate(LocalDate.from(LocalDateTime.now()));
+        return surgeryRepository.save(surgery);
+    }
+    public List<Scan> getScansByFolderId(Long folderId) {
+        return scanRepository.findByMedicalFolderId(folderId);
+    }
+
+    public List<Analysis> getAnalysesByFolderId(Long folderId) {
+        return analysisRepository.findByMedicalFolderId(folderId);
+    }
+
+    public List<Surgery> getSurgeriesByFolderId(Long folderId) {
+        return surgeryRepository.findByMedicalFolderId(folderId);
+    }
+
+    public Scan getScanById(Long id) {
+        return scanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Scan not found with id: " + id));
+    }
+
+    public Analysis getAnalysisById(Long id) {
+        return analysisRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Analysis not found with id: " + id));
+    }
+
+    public Surgery getSurgeryById(Long id) {
+        return surgeryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Surgery not found with id: " + id));
+    }
+
+
 }

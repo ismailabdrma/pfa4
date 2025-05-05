@@ -1,47 +1,62 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api/auth';
-  private readonly TOKEN_KEY = 'jwt';
+  private apiUrl = 'http://localhost:8080/api/auth';
+  private tokenKey = 'auth_token'; // 🔄 unified key
+  private emailKey = 'pending_email';
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login(credentials: any) {
-    return this.http.post<any>(`${this.API_URL}/login`, credentials);
+  login(credentials: { email: string; password: string }): Observable<any> {
+    localStorage.setItem(this.emailKey, credentials.email);
+    return this.http.post(`${this.apiUrl}/login`, credentials, { responseType: 'text' });
   }
 
-  register(data: any) {
-    return this.http.post<any>(`${this.API_URL}/register`, data);
+  verifyOtp(email: string, otpCode: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify-otp?email=${email}&otpCode=${otpCode}`, {}, { responseType: 'json' });
   }
 
-  saveToken(token: string) {
-    localStorage.setItem(this.TOKEN_KEY, token);
+  register(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, data);
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.tokenKey);
   }
 
-  logout() {
-    localStorage.removeItem(this.TOKEN_KEY);
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.emailKey);
     this.router.navigate(['/login']);
   }
 
-  redirectToDashboard() {
+  getPendingEmail(): string {
+    return localStorage.getItem(this.emailKey) || '';
+  }
+
+  setPendingEmail(email: string): void {
+    localStorage.setItem(this.emailKey, email);
+  }
+
+  redirectToDashboard(): void {
     const token = this.getToken();
-    if (!token) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    if (!token) return;
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const role = payload.role?.replace('ROLE_', '');
+      const role = payload.role;
 
       switch (role) {
         case 'PATIENT':
@@ -57,9 +72,10 @@ export class AuthService {
           this.router.navigate(['/dashboard/admin']);
           break;
         default:
-          this.router.navigate(['/login']);
+          this.router.navigate(['/select-role']);
       }
     } catch (e) {
+      console.error('Invalid token:', e);
       this.logout();
     }
   }

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
     List<Analysis> findByMedicalFolderId(Long medicalDocumentId);
+
+    List<Analysis> findAllByMedicalFolderId(Long id);
 }

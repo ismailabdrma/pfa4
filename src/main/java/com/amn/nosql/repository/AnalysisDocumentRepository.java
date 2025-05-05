@@ -1,5 +1,6 @@
-package com.amn.nosql;
+package com.amn.nosql.repository;
 
+import com.amn.nosql.document.AnalysisDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 

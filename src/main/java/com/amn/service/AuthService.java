@@ -4,12 +4,15 @@ import com.amn.dto.AuthResponse;
 import com.amn.dto.RegisterRequest;
 import com.amn.entity.*;
 import com.amn.entity.enums.Role;
+import com.amn.repository.MedicalFolderRepository;
+import com.amn.repository.PatientRepository;
 import com.amn.repository.UserRepository;
 import com.amn.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static com.amn.entity.enums.Role.*;
@@ -19,8 +22,10 @@ import static com.amn.entity.enums.Role.*;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final MedicalFolderRepository medicalFolderRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final PatientRepository patientRepository;
 
     public AuthResponse register(RegisterRequest request) {
         User user;
@@ -32,17 +37,6 @@ public class AuthService {
                     .password(passwordEncoder.encode(request.getPassword()))
                     .phone(request.getPhone())
                     .role(DOCTOR)
-                    .build();
-
-            case PATIENT -> user = Patient.builder()
-                    .fullName(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .phone(request.getPhone())
-                    .role(PATIENT)
-                    .cin(request.getCin())
-                    .birthDate(request.getBirthDate())
-                    .bloodType(request.getBloodType())
                     .build();
 
             case PHARMACIST -> user = Pharmacist.builder()
@@ -58,13 +52,35 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .phone(request.getPhone())
-                    .role(Role.ADMIN)
+                    .role(ADMIN)
                     .build();
+
+            case PATIENT -> {
+                Patient patient = Patient.builder()
+                        .fullName(request.getName())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .phone(request.getPhone())
+                        .role(PATIENT)
+                        .cin(request.getCin())
+                        .birthDate(request.getBirthDate())
+                        .bloodType(request.getBloodType())
+                        .build();
+
+                user = patientRepository.save(patient); // enregistrer le patient
+
+                // Créer dossier médical vide
+                MedicalFolder folder = new MedicalFolder();
+                folder.setPatient(patient);
+                folder.setCreationDate(LocalDate.now());
+                folder.setDescription("Dossier médical de " + patient.getFullName());
+                medicalFolderRepository.save(folder);
+            }
 
             default -> throw new IllegalArgumentException("Unsupported role: " + request.getRole());
         }
 
-        userRepository.save(user); // only one save outside the switch
+        userRepository.save(user); // enregistrer l'utilisateur général
 
         String token = jwtService.generateToken(
                 Map.of("role", user.getRole().name()),

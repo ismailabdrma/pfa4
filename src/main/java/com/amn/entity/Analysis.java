@@ -1,9 +1,11 @@
 package com.amn.entity;
 
+import com.amn.entity.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,7 +24,10 @@ public class Analysis {
     private String type; // For example: "Analysis"
     private String description;
     private String url;
-    private LocalDateTime uploadDate;
+    private LocalDate uploadDate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "file_type")
+    private FileType fileType;
 
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
