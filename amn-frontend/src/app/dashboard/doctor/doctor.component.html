@@ -1,29 +1,29 @@
 <div class="p-6 space-y-6">
   <h2 class="text-2xl font-bold">Tableau de bord du Médecin</h2>
 
-  <!-- Recherche du patient -->
+  <!-- 🔍 Recherche du patient -->
   <div class="space-y-2">
-    <input class="border p-2 w-full" [(ngModel)]="cin" placeholder="CIN du patient">
-    <input class="border p-2 w-full" [(ngModel)]="fullName" placeholder="Nom complet">
+    <input class="border p-2 w-full" [(ngModel)]="cin" placeholder="CIN du patient" />
+    <input class="border p-2 w-full" [(ngModel)]="fullName" placeholder="Nom complet" />
     <button class="bg-blue-600 text-white px-4 py-2 rounded" (click)="searchPatient()">Rechercher</button>
   </div>
 
-  <!-- Formulaire manuel -->
+  <!-- ✍️ Formulaire manuel -->
   <div *ngIf="showManualForm" class="bg-yellow-100 p-4 rounded space-y-2">
     <h3 class="font-bold">Complétez les informations</h3>
-    <input class="border p-2 w-full" [(ngModel)]="manualData.bloodType" placeholder="Groupe sanguin">
-    <input type="date" class="border p-2 w-full" [(ngModel)]="manualData.birthDate">
-    <input class="border p-2 w-full" [(ngModel)]="manualData.emergencyContact" placeholder="Contact d'urgence">
-    <input class="border p-2 w-full" [(ngModel)]="manualData.allergies" placeholder="Allergies">
-    <input class="border p-2 w-full" [(ngModel)]="manualData.chronicDiseases" placeholder="Maladies chroniques">
+    <input class="border p-2 w-full" [(ngModel)]="manualData.bloodType" placeholder="Groupe sanguin" />
+    <input type="date" class="border p-2 w-full" [(ngModel)]="manualData.birthDate" />
+    <input class="border p-2 w-full" [(ngModel)]="manualData.emergencyContact" placeholder="Contact d'urgence" />
+    <input class="border p-2 w-full" [(ngModel)]="manualData.allergies" placeholder="Allergies" />
+    <input class="border p-2 w-full" [(ngModel)]="manualData.chronicDiseases" placeholder="Maladies chroniques" />
     <div class="space-x-4">
-      <label><input type="checkbox" [(ngModel)]="manualData.hasHeartProblem"> Problèmes cardiaques</label>
-      <label><input type="checkbox" [(ngModel)]="manualData.hasSurgery"> Chirurgies antérieures</label>
+      <label><input type="checkbox" [(ngModel)]="manualData.hasHeartProblem" /> Problèmes cardiaques</label>
+      <label><input type="checkbox" [(ngModel)]="manualData.hasSurgery" /> Chirurgies antérieures</label>
     </div>
     <button class="bg-green-600 text-white px-4 py-2 rounded" (click)="submitManualFolder()">Enregistrer</button>
   </div>
 
-  <!-- Profil patient -->
+  <!-- 👤 Profil patient -->
   <div *ngIf="patientProfile" class="bg-gray-100 p-4 rounded space-y-3 shadow">
     <h3 class="text-xl font-bold">Informations Patient</h3>
     <p><strong>Nom:</strong> {{ patientProfile.fullName }}</p>
@@ -38,67 +38,66 @@
     <p><strong>Problèmes cardiaques:</strong> {{ patientProfile.hasHeartProblem ? 'Oui' : 'Non' }}</p>
     <p><strong>Chirurgies antérieures:</strong> {{ patientProfile.hasSurgery ? 'Oui' : 'Non' }}</p>
 
-    <!-- Consultation -->
+    <!-- 🩺 Consultation -->
     <div class="border-t pt-4">
       <h4 class="text-lg font-bold">Ajouter une consultation</h4>
-      <input class="border p-2 w-full mb-2" [(ngModel)]="medicalRecord.reason" placeholder="Motif">
-      <input class="border p-2 w-full mb-2" [(ngModel)]="medicalRecord.diagnosis" placeholder="Diagnostic">
+      <input class="border p-2 w-full mb-2" [(ngModel)]="medicalRecord.reason" placeholder="Motif" />
+      <input class="border p-2 w-full mb-2" [(ngModel)]="medicalRecord.diagnosis" placeholder="Diagnostic" />
       <textarea class="border p-2 w-full mb-2" [(ngModel)]="medicalRecord.notes" placeholder="Notes"></textarea>
       <button class="bg-blue-500 text-white px-4 py-2 rounded" (click)="createMedicalRecord()">Ajouter</button>
     </div>
 
-    <!-- Prescription -->
+    <!-- 💊 Prescription -->
     <div class="border-t pt-4">
       <h4 class="text-lg font-bold">Prescrire un traitement</h4>
-      <input class="border p-2 w-full mb-2" [(ngModel)]="prescription.medicines" placeholder="Médicaments">
+      <input class="border p-2 w-full mb-2" [(ngModel)]="prescription.medicines" placeholder="Médicaments" />
       <textarea class="border p-2 w-full mb-2" [(ngModel)]="prescription.instructions" placeholder="Instructions"></textarea>
       <button class="bg-blue-500 text-white px-4 py-2 rounded" (click)="writePrescription()">Prescrire</button>
     </div>
 
-    <!-- Uploads -->
+    <!-- 📁 Téléversement -->
     <div class="border-t pt-4 space-y-4">
       <h4 class="text-lg font-bold">Téléverser un document</h4>
 
       <!-- Scan -->
       <div>
         <h5 class="font-semibold">Scan</h5>
-        <input class="border p-2 w-full mb-2" [(ngModel)]="scanPayload.title" placeholder="Titre">
-        <input class="border p-2 w-full mb-2" [(ngModel)]="scanPayload.description" placeholder="Description">
-        <input type="file" class="mb-2" (change)="onScanFileChange($event)">
+        <input class="border p-2 w-full mb-2" [(ngModel)]="scanPayload.title" placeholder="Titre" />
+        <input class="border p-2 w-full mb-2" [(ngModel)]="scanPayload.description" placeholder="Description" />
+        <input type="file" class="mb-2" (change)="onScanFileChange($event)" />
         <button class="bg-blue-600 text-white px-4 py-2 rounded" (click)="uploadScan()">Ajouter Scan</button>
       </div>
 
       <!-- Analyse -->
       <div>
         <h5 class="font-semibold">Analyse</h5>
-        <input class="border p-2 w-full mb-2" [(ngModel)]="analysisPayload.title" placeholder="Titre">
-        <input class="border p-2 w-full mb-2" [(ngModel)]="analysisPayload.description" placeholder="Description">
-        <input type="file" class="mb-2" (change)="onAnalysisFileChange($event)">
+        <input class="border p-2 w-full mb-2" [(ngModel)]="analysisPayload.title" placeholder="Titre" />
+        <input class="border p-2 w-full mb-2" [(ngModel)]="analysisPayload.description" placeholder="Description" />
+        <input type="file" class="mb-2" (change)="onAnalysisFileChange($event)" />
         <button class="bg-green-600 text-white px-4 py-2 rounded" (click)="uploadAnalysis()">Ajouter Analyse</button>
       </div>
 
       <!-- Chirurgie -->
       <div>
         <h5 class="font-semibold">Chirurgie</h5>
-        <input class="border p-2 w-full mb-2" [(ngModel)]="surgeryPayload.title" placeholder="Titre">
-        <input class="border p-2 w-full mb-2" [(ngModel)]="surgeryPayload.description" placeholder="Description">
-        <input type="file" class="mb-2" (change)="onSurgeryFileChange($event)">
+        <input class="border p-2 w-full mb-2" [(ngModel)]="surgeryPayload.title" placeholder="Titre" />
+        <input class="border p-2 w-full mb-2" [(ngModel)]="surgeryPayload.description" placeholder="Description" />
+        <input type="file" class="mb-2" (change)="onSurgeryFileChange($event)" />
         <button class="bg-red-600 text-white px-4 py-2 rounded" (click)="uploadSurgery()">Ajouter Chirurgie</button>
       </div>
 
       <!-- Vaccination -->
       <div>
         <h5 class="font-semibold">Vaccination</h5>
-        <input class="border p-2 w-full mb-2" [(ngModel)]="vaccination.vaccineName" placeholder="Nom du vaccin">
-        <input class="border p-2 w-full mb-2" [(ngModel)]="vaccination.manufacturer" placeholder="Fabricant">
-        <input type="number" class="border p-2 w-full mb-2" [(ngModel)]="vaccination.doseNumber" placeholder="Dose">
-        <input type="date" class="border p-2 w-full mb-2" [(ngModel)]="vaccination.date">
-
+        <input class="border p-2 w-full mb-2" [(ngModel)]="vaccination.vaccineName" placeholder="Nom du vaccin" />
+        <input class="border p-2 w-full mb-2" [(ngModel)]="vaccination.manufacturer" placeholder="Fabricant" />
+        <input type="number" class="border p-2 w-full mb-2" [(ngModel)]="vaccination.doseNumber" placeholder="Dose" />
+        <input type="date" class="border p-2 w-full mb-2" [(ngModel)]="vaccination.date" />
         <button class="bg-yellow-700 text-white px-4 py-2 rounded" (click)="addVaccination()">Ajouter Vaccination</button>
       </div>
     </div>
 
-    <!-- Historique -->
+    <!-- 🕓 Historique -->
     <div class="border-t pt-4 space-y-4">
       <h4 class="text-lg font-bold">Historique du dossier</h4>
 
@@ -107,64 +106,4 @@
         <ul class="list-disc ml-5">
           <li *ngFor="let r of patientProfile.medicalRecords">
             <a class="text-indigo-600 underline cursor-pointer" (click)="viewConsultationDetails(r.id)">
-              {{ r.creationDate }} - {{ r.reason }} - {{ r.diagnosis }}
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-
-      <ng-container *ngIf="patientProfile?.prescriptions?.length">
-        <h5 class="font-semibold">Prescriptions</h5>
-        <ul class="list-disc ml-5">
-          <li *ngFor="let p of patientProfile.prescriptions">
-            <a class="text-purple-700 underline cursor-pointer" (click)="viewPrescriptionDetails(p.id)">
-              {{ p.prescribedDate }} - {{ p.medicines }}
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-
-      <ng-container *ngIf="patientProfile?.scans?.length">
-        <h5 class="font-semibold">Scans</h5>
-        <ul class="list-disc ml-5">
-          <li *ngFor="let s of patientProfile.scans">
-            <a class="text-blue-700 underline cursor-pointer" (click)="viewScanDetails(s.id)">
-              {{ s.title }} - {{ s.uploadDate }}
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-
-      <ng-container *ngIf="patientProfile?.analyses?.length">
-        <h5 class="font-semibold">Analyses</h5>
-        <ul class="list-disc ml-5">
-          <li *ngFor="let a of patientProfile.analyses">
-            <a class="text-green-700 underline cursor-pointer" (click)="viewAnalysisDetails(a.id)">
-              {{ a.title }} - {{ a.uploadDate }}
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-
-      <ng-container *ngIf="patientProfile?.surgeries?.length">
-        <h5 class="font-semibold">Chirurgies</h5>
-        <ul class="list-disc ml-5">
-          <li *ngFor="let s of patientProfile.surgeries">
-            <a class="text-red-700 underline cursor-pointer" (click)="viewSurgeryDetails(s.id)">
-              {{ s.title }} - {{ s.uploadDate }}
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-
-      <ng-container *ngIf="patientProfile?.vaccinations?.length">
-        <h5 class="font-semibold">Vaccinations</h5>
-        <ul class="list-disc ml-5">
-          <li *ngFor="let v of patientProfile.vaccinations">
-            {{ v.vaccineName }} - {{ v.vaccinationDate }}
-          </li>
-        </ul>
-      </ng-container>
-    </div>
-  </div>
-</div>
+              {{ r.creationDate }} - {{ r.reason }} -

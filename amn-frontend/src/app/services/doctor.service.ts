@@ -4,11 +4,12 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DoctorService {
-  private readonly API_URL = 'http://localhost:8080/api/doctor';
+
+  private API_URL = 'http://localhost:8080/api/doctor'; // ✅ Define API base URL
 
   constructor(private http: HttpClient) {}
 
-  // --- 🔐 Helper: Get JWT headers ---
+  // --- 🔐 JWT Headers ---
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('jwt');
     return new HttpHeaders({
@@ -33,8 +34,9 @@ export class DoctorService {
   }
 
   createOrUpdateMedicalFolder(cin: string, fullName: string, patientData: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/create-folder/${cin}?fullName=${fullName}`, patientData, {
-      headers: this.getHeaders()
+    return this.http.post(`${this.API_URL}/create-folder/${cin}`, patientData, {
+      headers: this.getHeaders(),
+      params: { fullName }
     });
   }
 
@@ -61,36 +63,38 @@ export class DoctorService {
     manufacturer: string,
     date: string
   ): Observable<any> {
-    const params = {
-      folderId,
-      name: vaccineName,
-      dose: doseNumber,
-      manufacturer,
-      date
-    };
     return this.http.post(`${this.API_URL}/add-vaccination`, null, {
       headers: this.getHeaders(),
-      params
+      params: {
+        folderId,
+        vaccineName,
+        doseNumber,
+        manufacturer,
+        date
+      }
     });
   }
 
-  // --- 📎 Upload Files (Multipart FormData) ---
+  // --- 📎 Upload Files ---
 
   uploadScan(data: FormData, folderId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/upload-scan-file?folderId=${folderId}`, data, {
-      headers: this.getHeaders().delete('Content-Type') // Let browser set boundary
+    return this.http.post(`${this.API_URL}/upload-scan-file`, data, {
+      headers: this.getHeaders().delete('Content-Type'),
+      params: { folderId }
     });
   }
 
   uploadAnalysis(data: FormData, folderId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/upload-analysis?folderId=${folderId}`, data, {
-      headers: this.getHeaders().delete('Content-Type')
+    return this.http.post(`${this.API_URL}/upload-analysis`, data, {
+      headers: this.getHeaders().delete('Content-Type'),
+      params: { folderId }
     });
   }
 
   uploadSurgery(data: FormData, folderId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/upload-surgery?folderId=${folderId}`, data, {
-      headers: this.getHeaders().delete('Content-Type')
+    return this.http.post(`${this.API_URL}/upload-surgery`, data, {
+      headers: this.getHeaders().delete('Content-Type'),
+      params: { folderId }
     });
   }
 

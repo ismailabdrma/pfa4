@@ -1,18 +1,16 @@
 package com.amn.entity;
 
 import com.amn.entity.enums.PrescriptionStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
+@Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
-@Entity
 public class Prescription {
 
     @Id
@@ -22,28 +20,25 @@ public class Prescription {
     private String medicationName;
     private String dosage;
     private String period;
-
-    @Enumerated(EnumType.STRING)
-    private PrescriptionStatus status;
-
     private boolean permanent;
 
     private LocalDateTime prescribedDate;
 
+    @Enumerated(EnumType.STRING)
+    private PrescriptionStatus status;
+
     @ManyToOne
-    @JoinColumn(name = "patient_id")
-    @JsonIgnore
     private Patient patient;
 
     @ManyToOne
-    @JoinColumn(name = "pharmacist_id")
     private Pharmacist dispensingPharmacist;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
     private Doctor prescribingDoctor;
+
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
     private MedicalFolder medicalFolder;
+// 🔥 THIS FIXES THE ERROR
 
 }

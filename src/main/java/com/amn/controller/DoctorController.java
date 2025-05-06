@@ -1,6 +1,9 @@
 package com.amn.controller;
 
 import com.amn.dto.PatientProfileDTO;
+import com.amn.dto.ScanDTO;
+import com.amn.dto.AnalysisDTO;
+import com.amn.dto.SurgeryDTO;
 import com.amn.entity.*;
 import com.amn.service.DoctorService;
 import com.amn.service.FileStorageService;
@@ -22,7 +25,6 @@ public class DoctorController {
     private final DoctorService doctorService;
     private final FileStorageService fileStorageService;
 
-    // ✅ Retrieve medical folder by patient info
     @GetMapping("/folder")
     public ResponseEntity<MedicalFolder> getPatientFolder(
             @RequestParam String cin,
@@ -33,7 +35,6 @@ public class DoctorController {
         );
     }
 
-    // ✅ Add new medical record
     @PostMapping("/add-record/{patientId}")
     public ResponseEntity<MedicalRecord> createMedicalRecord(
             @PathVariable Long patientId,
@@ -44,7 +45,6 @@ public class DoctorController {
         );
     }
 
-    // ✅ Add prescription
     @PostMapping("/prescribe/{patientId}")
     public ResponseEntity<Prescription> writePrescription(
             @PathVariable Long patientId,
@@ -55,7 +55,6 @@ public class DoctorController {
         );
     }
 
-    // ✅ Get patient ID from CIN + name
     @GetMapping("/get-id")
     public ResponseEntity<Long> getPatientId(
             @RequestParam String cin,
@@ -66,7 +65,6 @@ public class DoctorController {
         );
     }
 
-    // ✅ Create folder and update patient info
     @PostMapping("/create-folder/{cin}")
     public ResponseEntity<?> createFolderWithDetails(
             @PathVariable String cin,
@@ -78,7 +76,6 @@ public class DoctorController {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ Get full profile for display
     @GetMapping("/full-profile")
     public ResponseEntity<PatientProfileDTO> getFullPatientProfile(
             @RequestParam String cin,
@@ -89,7 +86,6 @@ public class DoctorController {
         );
     }
 
-    // ✅ Upload SCAN (link-based)
     @PostMapping("/upload-scan")
     public ResponseEntity<Scan> uploadScanLink(
             @RequestBody Scan scan,
@@ -98,7 +94,6 @@ public class DoctorController {
         return ResponseEntity.ok(fileStorageService.saveScanFromLink(scan, folderId));
     }
 
-    // ✅ Upload SCAN (file-based)
     @PostMapping("/upload-scan-file")
     public ResponseEntity<Scan> uploadScanFile(
             @RequestParam("file") MultipartFile file,
@@ -106,10 +101,11 @@ public class DoctorController {
             @RequestParam("description") String description,
             @RequestParam("folderId") Long folderId
     ) {
-        return ResponseEntity.ok(doctorService.uploadScanLocally(file, title, description, folderId));
+        return ResponseEntity.ok(
+                doctorService.uploadScanLocally(file, title, description, folderId)
+        );
     }
 
-    // ✅ Upload ANALYSIS (file-based)
     @PostMapping("/upload-analysis")
     public ResponseEntity<Analysis> uploadAnalysis(
             @RequestParam("file") MultipartFile file,
@@ -117,10 +113,11 @@ public class DoctorController {
             @RequestParam("description") String description,
             @RequestParam("folderId") Long folderId
     ) {
-        return ResponseEntity.ok(doctorService.uploadAnalysisLocally(file, title, description, folderId));
+        return ResponseEntity.ok(
+                doctorService.uploadAnalysisLocally(file, title, description, folderId)
+        );
     }
 
-    // ✅ Upload SURGERY (file optional)
     @PostMapping("/upload-surgery")
     public ResponseEntity<Surgery> uploadSurgery(
             @RequestParam(value = "file", required = false) MultipartFile file,
@@ -128,7 +125,9 @@ public class DoctorController {
             @RequestParam("description") String description,
             @RequestParam("folderId") Long folderId
     ) {
-        return ResponseEntity.ok(doctorService.uploadSurgeryLocally(file, title, description, folderId));
+        return ResponseEntity.ok(
+                doctorService.uploadSurgeryLocally(file, title, description, folderId)
+        );
     }
 
     @PostMapping("/add-vaccination")
@@ -145,40 +144,45 @@ public class DoctorController {
         );
     }
 
-
-    // ✅ View SCAN by ID
     @GetMapping("/scan/{id}")
     public ResponseEntity<Scan> getScanById(@PathVariable Long id) {
         return ResponseEntity.ok(fileStorageService.getScanById(id));
     }
 
-    // ✅ View ANALYSIS by ID
     @GetMapping("/analysis/{id}")
     public ResponseEntity<Analysis> getAnalysisById(@PathVariable Long id) {
         return ResponseEntity.ok(fileStorageService.getAnalysisById(id));
     }
 
-    // ✅ View SURGERY by ID
     @GetMapping("/surgery/{id}")
     public ResponseEntity<Surgery> getSurgeryById(@PathVariable Long id) {
         return ResponseEntity.ok(fileStorageService.getSurgeryById(id));
     }
 
-    // ✅ List all scans by folder
     @GetMapping("/scans")
-    public ResponseEntity<List<Scan>> getScansByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getScansByFolderId(folderId));
+    public ResponseEntity<List<ScanDTO>> getScansByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(
+                fileStorageService.getScansByFolderId(folderId).stream()
+                        .map(ScanDTO::fromEntity)
+                        .toList()
+        );
     }
 
-    // ✅ List all analyses by folder
     @GetMapping("/analyses")
-    public ResponseEntity<List<Analysis>> getAnalysesByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getAnalysesByFolderId(folderId));
+    public ResponseEntity<List<AnalysisDTO>> getAnalysesByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(
+                fileStorageService.getAnalysesByFolderId(folderId).stream()
+                        .map(AnalysisDTO::fromEntity)
+                        .toList()
+        );
     }
 
-    // ✅ List all surgeries by folder
     @GetMapping("/surgeries")
-    public ResponseEntity<List<Surgery>> getSurgeriesByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getSurgeriesByFolderId(folderId));
+    public ResponseEntity<List<SurgeryDTO>> getSurgeriesByFolder(@RequestParam Long folderId) {
+        return ResponseEntity.ok(
+                fileStorageService.getSurgeriesByFolderId(folderId).stream()
+                        .map(SurgeryDTO::fromEntity)
+                        .toList()
+        );
     }
 }

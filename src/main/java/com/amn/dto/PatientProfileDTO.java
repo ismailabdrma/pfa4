@@ -27,15 +27,14 @@ public class PatientProfileDTO {
     private String email;
     private String phone;
     private String address;
+    private Long medicalFolderId;
 
-    private Long medicalFolderId; // ✅ Add this line
-
-    // Medical folder contents
+    // Use raw entity lists — NO DTOs
     private List<MedicalRecord> medicalRecords;
     private List<Vaccination> vaccinations;
     private List<VisitLog> visitLogs;
-    private List<Scan> scans;
-    private List<Surgery> surgeries;
+    private List<ScanDTO> scans;
+    private List<SurgeryDTO> surgeries;
     private List<Prescription> prescriptions;
-    private List<Analysis> analyses;
+    private List<AnalysisDTO> analyses;
 }

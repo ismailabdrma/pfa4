@@ -60,7 +60,7 @@ export class DoctorComponent {
       next: (profile) => {
         this.patientProfile = profile;
         this.patientId = profile.id;
-        this.folderId = profile.medicalFolderId || profile.folderId || null;
+        this.folderId = profile.medicalFolderId || null;
         this.showManualForm = !profile.bloodType || !profile.birthDate || !profile.emergencyContact;
       },
       error: (err) => {
