@@ -1,0 +1,73 @@
+/* Custom styles for consultation component */
+
+input[type="file"] {
+  padding: 0.4rem;
+  line-height: 1.2;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  background-color: #edf2f7;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.25rem;
+  padding: 0.4rem 0.8rem;
+  margin-right: 1rem;
+  font-size: 0.875rem;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background-color: #e2e8f0;
+}
+
+/* Prescription medication styling */
+.medication-item {
+  border-left: 3px solid #4299e1;
+}
+
+/* Form validation styles */
+.ng-invalid.ng-touched.form-control {
+  border-color: #f56565;
+}
+
+.validation-error {
+  color: #f56565;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Form section transitions */
+.form-section {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Focus styles */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  border-color: #4299e1;
+}
+
+/* Button loading state */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Custom checkboxes */
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Mobile responsiveness adjustments */
+@media (max-width: 768px) {
+  .medication-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .medication-controls button {
+    margin-top: 0.5rem;
+  }
+}

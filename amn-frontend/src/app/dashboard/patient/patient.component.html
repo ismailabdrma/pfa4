@@ -1,56 +1,46 @@
-<h2>Bienvenue, {{ profile?.fullName }}</h2>
+<div class="p-6 bg-gray-50 min-h-screen">
+  <h1 class="text-2xl font-bold mb-6">Mon Dossier Médical</h1>
 
-<div *ngIf="profile">
-  <p><strong>CIN :</strong> {{ profile.cin }}</p>
-  <p><strong>Date de naissance :</strong> {{ profile.birthDate }}</p>
-  <p><strong>Groupe Sanguin :</strong> {{ profile.bloodType }}</p>
-  <p><strong>Contact d'urgence :</strong> {{ profile.emergencyContact || 'Non renseigné' }}</p>
-  <p><strong>Allergies :</strong> {{ profile.allergies || 'Non renseignées' }}</p>
-  <p><strong>Maladies chroniques :</strong> {{ profile.chronicDiseases || 'Aucune' }}</p>
-  <p><strong>Problèmes cardiaques :</strong> {{ profile.hasHeartProblem ? 'Oui' : 'Non' }}</p>
-  <p><strong>Antécédents chirurgicaux :</strong> {{ profile.hasSurgery ? 'Oui' : 'Non' }}</p>
+  <!-- Search Form -->
+  <div class="bg-white shadow rounded p-4 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Rechercher votre dossier</h2>
+    <div class="flex space-x-4">
+      <input [(ngModel)]="cin" placeholder="CIN" class="border p-2 flex-1" />
+      <button (click)="getPatientProfile()" class="bg-blue-600 text-white px-4 py-2 rounded">Rechercher</button>
+    </div>
+    <p class="text-red-500 mt-2">{{ errorMessage }}</p>
+  </div>
+
+  <!-- Patient Profile -->
+  <div *ngIf="patientProfile" class="bg-white shadow rounded p-4 mb-6">
+    <h2 class="text-lg font-semibold mb-2">Profile: {{ patientProfile?.fullName }}</h2>
+    <p><strong>CIN:</strong> {{ patientProfile?.cin }}</p>
+    <p><strong>Email:</strong> {{ patientProfile?.email }}</p>
+    <p><strong>Phone:</strong> {{ patientProfile?.phone }}</p>
+    <p><strong>Blood Type:</strong> {{ patientProfile?.bloodType }}</p>
+    <p><strong>Emergency Contact:</strong> {{ patientProfile?.emergencyContact }}</p>
+    <p><strong>Allergies:</strong> {{ patientProfile?.allergies }}</p>
+    <p><strong>Chronic Diseases:</strong> {{ patientProfile?.chronicDiseases }}</p>
+  </div>
+
+  <!-- Prescriptions -->
+  <div *ngIf="patientProfile?.prescriptions?.length" class="bg-white shadow rounded p-4">
+    <h2 class="text-lg font-semibold mb-4">Ordonnances</h2>
+    <ul>
+      <li *ngFor="let prescription of patientProfile?.prescriptions ?? []">
+        {{ prescription.prescribedDate | date: 'short' }} - {{ prescription.status }}
+        <ul>
+          <li *ngFor="let med of prescription.medications ?? []">
+            {{ med.name }} - {{ med.dosage }}
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- No Prescriptions Message -->
+  <div *ngIf="patientProfile?.prescriptions?.length === 0" class="text-gray-500">
+    Aucune ordonnance trouvée.
+  </div>
 </div>
 
-<!-- Medical Records -->
-<div *ngIf="profile.medicalRecords?.length">
-  <h3>Consultations médicales :</h3>
-  <ul>
-    <li *ngFor="let record of profile.medicalRecords">
-      {{ record.title }} - {{ record.date }}
-    </li>
-  </ul>
-</div>
-
-<!-- Prescriptions -->
-<div *ngIf="profile.prescriptions?.length">
-  <h3>Ordonnances :</h3>
-  <ul>
-    <li *ngFor="let p of profile.prescriptions">
-      {{ p.medicationName }} - {{ p.dosage }} - {{ p.date }}
-    </li>
-  </ul>
-</div>
-
-<!-- Scans -->
-<div *ngIf="profile.scans?.length">
-  <h3>Scans :</h3>
-  <ul>
-    <li *ngFor="let s of profile.scans">
-      <a [href]="s.url" target="_blank">{{ s.title }} - {{ s.uploadDate }}</a>
-    </li>
-  </ul>
-</div>
-
-<!-- Surgeries -->
-<div *ngIf="profile.surgeries?.length">
-  <h3>Chirurgies :</h3>
-  <ul>
-    <li *ngFor="let surgery of profile.surgeries">
-      {{ surgery.title }} - {{ surgery.date }}
-    </li>
-  </ul>
-</div>
-
-<p style="margin-top: 1rem; font-style: italic; color: gray;">
-  Pour toute interprétation médicale, veuillez contacter votre médecin traitant.
-</p>

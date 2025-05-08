@@ -13,6 +13,7 @@ export class PharmacistService {
 
   /**
    * ✅ Get prescriptions by CIN and Full Name with optional status filter.
+   * Default status is 'ALL'. Can also be 'DISPENSED', 'PENDING', etc.
    */
   getPrescriptions(cin: string, fullName: string, status: string = 'ALL'): Observable<PrescriptionDTO[]> {
     return this.http.get<PrescriptionDTO[]>(`${this.apiUrl}/prescriptions`, {

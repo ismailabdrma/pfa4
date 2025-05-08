@@ -1,116 +1,573 @@
-<div class="p-6 bg-gray-50 min-h-screen">
-  <h1 class="text-2xl font-bold mb-6">Bienvenue Dr. {{ doctorName || '---' }}</h1>
+<div class="container mx-auto p-4">
+  <!-- Header -->
+  <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Tableau de bord du Médecin</h1>
+        <p class="text-gray-600">Dr. {{ doctorName }}</p>
+        <p class="text-gray-500 text-sm">{{ doctorEmail }}</p>
+      </div>
+      <div>
+        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Patient Search -->
-  <div class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Recherche du Patient</h2>
-    <div class="flex space-x-4">
-      <input [(ngModel)]="cin" placeholder="CIN du patient" class="border p-2 flex-1" />
-      <input [(ngModel)]="fullName" placeholder="Nom complet" class="border p-2 flex-1" />
-      <button (click)="searchPatient()" class="bg-blue-600 text-white px-4 py-2 rounded">Rechercher</button>
+  <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">Rechercher un Patient</h2>
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">CIN</label>
+        <input
+          type="text"
+          [(ngModel)]="cin"
+          class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+          placeholder="CIN du patient"
+        />
+      </div>
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Nom Complet</label>
+        <input
+          type="text"
+          [(ngModel)]="fullName"
+          class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+          placeholder="Nom complet du patient"
+        />
+      </div>
+      <div class="self-end">
+        <button
+          (click)="searchPatient()"
+          [disabled]="!cin || !fullName"
+          class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md disabled:bg-gray-400"
+        >
+          Rechercher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Form for New Patient -->
+  <div *ngIf="showManualForm" class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">Informations du Patient</h2>
+    <p class="text-gray-600 mb-4">Veuillez compléter les informations suivantes pour créer ou mettre à jour le dossier.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Groupe sanguin*</label>
+        <select
+          [(ngModel)]="manualData.bloodType"
+          class="w-full p-2 border border-gray-300 rounded-md"
+        >
+          <option value="">Sélectionner</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
+        <input
+          type="date"
+          [(ngModel)]="manualData.birthDate"
+          class="w-full p-2 border border-gray-300 rounded-md"
+        >
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Contact d'urgence*</label>
+        <input
+          type="text"
+          [(ngModel)]="manualData.emergencyContact"
+          class="w-full p-2 border border-gray-300 rounded-md"
+          placeholder="Nom et téléphone"
+        >
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Allergies</label>
+        <textarea
+          [(ngModel)]="manualData.allergies"
+          class="w-full p-2 border border-gray-300 rounded-md"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Maladies chroniques</label>
+        <textarea
+          [(ngModel)]="manualData.chronicDiseases"
+          class="w-full p-2 border border-gray-300 rounded-md"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <div class="col-span-1 md:col-span-2 flex gap-4">
+        <div>
+          <label class="inline-flex items-center">
+            <input
+              type="checkbox"
+              [(ngModel)]="manualData.hasHeartProblem"
+              class="form-checkbox h-5 w-5 text-purple-600"
+            >
+            <span class="ml-2">Problèmes cardiaques</span>
+          </label>
+        </div>
+        <div>
+          <label class="inline-flex items-center">
+            <input
+              type="checkbox"
+              [(ngModel)]="manualData.hasSurgery"
+              class="form-checkbox h-5 w-5 text-purple-600"
+            >
+            <span class="ml-2">Antécédents chirurgicaux</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <button
+        (click)="submitManualFolder()"
+        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md"
+      >
+        Enregistrer
+      </button>
     </div>
   </div>
 
-  <!-- Patient Profile Section -->
-  <div *ngIf="patientProfile" class="bg-white shadow rounded p-6 mb-6">
-    <div class="flex items-center space-x-4 mb-4">
-      <div class="w-16 h-16 bg-gray-300 rounded-full"></div>
-      <div>
-        <h2 class="text-xl font-bold">{{ patientProfile.fullName }}</h2>
-        <p class="text-gray-600">CIN: {{ patientProfile.cin }}</p>
+  <!-- Patient Information Display -->
+  <div *ngIf="patientProfile && !showManualForm" class="space-y-6">
+    <!-- Personal Information -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Informations Personnelles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p><span class="font-medium">Nom:</span> {{ patientProfile.fullName }}</p>
+          <p><span class="font-medium">CIN:</span> {{ patientProfile.cin }}</p>
+          <p><span class="font-medium">Date de naissance:</span> {{ patientProfile.birthDate || 'Non spécifié' }}</p>
+          <p><span class="font-medium">Groupe sanguin:</span> {{ patientProfile.bloodType || 'Non spécifié' }}</p>
+          <p><span class="font-medium">Email:</span> {{ patientProfile.email || 'Non spécifié' }}</p>
+        </div>
+        <div>
+          <p><span class="font-medium">Téléphone:</span> {{ patientProfile.phone || 'Non spécifié' }}</p>
+          <p><span class="font-medium">Adresse:</span> {{ patientProfile.address || 'Non spécifié' }}</p>
+          <p><span class="font-medium">Contact d'urgence:</span> {{ patientProfile.emergencyContact || 'Non spécifié' }}</p>
+          <p><span class="font-medium">Allergies:</span> {{ patientProfile.allergies || 'Aucune' }}</p>
+          <p><span class="font-medium">Maladies chroniques:</span> {{ patientProfile.chronicDiseases || 'Aucune' }}</p>
+        </div>
+        <div class="col-span-1 md:col-span-2 mt-2">
+          <p><span class="font-medium">Problèmes cardiaques:</span> {{ patientProfile.hasHeartProblem ? 'Oui' : 'Non' }}</p>
+          <p><span class="font-medium">Antécédents chirurgicaux:</span> {{ patientProfile.hasSurgery ? 'Oui' : 'Non' }}</p>
+        </div>
+
+        <div class="col-span-1 md:col-span-2 mt-4">
+          <button
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md mr-2"
+            [routerLink]="['/dashboard/doctor/consultation-prescription', patientProfile.cin, patientProfile.fullName]"
+          >
+            Nouvelle Consultation
+          </button>
+        </div>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <p><strong>Date de naissance:</strong> {{ patientProfile.birthDate || 'Non renseigné' }}</p>
-        <p><strong>Groupe sanguin:</strong> {{ patientProfile.bloodType || 'Non renseigné' }}</p>
-        <p><strong>Problème cardiaque:</strong> {{ patientProfile.hasHeartProblem ? 'Oui' : 'Non' }}</p>
-        <p><strong>Antécédents de chirurgie:</strong> {{ patientProfile.hasSurgery ? 'Oui' : 'Non' }}</p>
+
+    <!-- Medical Documents Tabs -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Dossier Médical</h2>
+
+      <!-- Medical Records Section -->
+      <div class="mb-8">
+        <h3 class="text-lg font-medium mb-3">Consultations</h3>
+        <div *ngIf="patientProfile.medicalRecords && patientProfile.medicalRecords.length > 0" class="space-y-3">
+          <div *ngFor="let record of patientProfile.medicalRecords" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between">
+              <h4 class="font-medium">{{ record.creationDate | date:'dd/MM/yyyy' }} - {{ record.reason }}</h4>
+              <button
+                (click)="viewConsultationDetails(record.id)"
+                class="text-blue-600 hover:text-blue-800"
+              >
+                Détails
+              </button>
+            </div>
+            <p class="text-gray-600">{{ record.diagnosis }}</p>
+          </div>
+        </div>
+        <div *ngIf="!patientProfile.medicalRecords || patientProfile.medicalRecords.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucune consultation enregistrée</p>
+        </div>
       </div>
+
+      <!-- Prescriptions Section -->
+      <div class="mb-8">
+        <h3 class="text-lg font-medium mb-3">Ordonnances</h3>
+        <div *ngIf="patientProfile.prescriptions && patientProfile.prescriptions.length > 0" class="space-y-3">
+          <div *ngFor="let prescription of patientProfile.prescriptions" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between">
+              <h4 class="font-medium">{{ prescription.prescribedDate | date:'dd/MM/yyyy' }}</h4>
+              <button
+                (click)="viewPrescriptionDetails(prescription.id)"
+                class="text-blue-600 hover:text-blue-800"
+              >
+                Détails
+              </button>
+            </div>
+            <p><span class="font-medium">Médicament:</span> {{ prescription.medicationName }}</p>
+            <p><span class="font-medium">Dosage:</span> {{ prescription.dosage }}</p>
+          </div>
+        </div>
+        <div *ngIf="!patientProfile.prescriptions || patientProfile.prescriptions.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucune ordonnance enregistrée</p>
+        </div>
+      </div>
+
+      <!-- Scans Section -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-medium">Scans</h3>
+          <button
+            class="text-purple-600 hover:text-purple-800"
+            data-bs-toggle="collapse"
+            data-bs-target="#scanFormCollapse"
+          >
+            + Ajouter
+          </button>
+        </div>
+
+        <!-- Scan Upload Form -->
+        <div class="collapse mb-4" id="scanFormCollapse">
+          <div class="border rounded-lg p-4 bg-gray-50">
+            <h4 class="font-medium mb-3">Nouveau Scan</h4>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Titre*</label>
+              <input
+                type="text"
+                [(ngModel)]="scanPayload.title"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                [(ngModel)]="scanPayload.description"
+                class="w-full p-2 border border-gray-300 rounded-md"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Fichier*</label>
+              <input
+                type="file"
+                (change)="onScanFileChange($event)"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="flex justify-end gap-2">
+              <button
+                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                data-bs-toggle="collapse"
+                data-bs-target="#scanFormCollapse"
+              >
+                Annuler
+              </button>
+              <button
+                (click)="uploadScan()"
+                [disabled]="!scanPayload.title || !scanFile"
+                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scans List -->
+        <div *ngIf="patientProfile.scans && patientProfile.scans.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let scan of patientProfile.scans" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between mb-2">
+              <h4 class="font-medium">{{ scan.title }}</h4>
+              <span class="text-sm text-gray-500">{{ scan.uploadDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">{{ scan.description }}</p>
+            <button
+              (click)="viewScanDetails(scan.id)"
+              class="text-blue-600 hover:text-blue-800 text-sm"
+            >
+              Voir le scan
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!patientProfile.scans || patientProfile.scans.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucun scan enregistré</p>
+        </div>
+      </div>
+
+      <!-- Analyses Section -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-medium">Analyses</h3>
+          <button
+            class="text-purple-600 hover:text-purple-800"
+            data-bs-toggle="collapse"
+            data-bs-target="#analysisFormCollapse"
+          >
+            + Ajouter
+          </button>
+        </div>
+
+        <!-- Analysis Upload Form -->
+        <div class="collapse mb-4" id="analysisFormCollapse">
+          <div class="border rounded-lg p-4 bg-gray-50">
+            <h4 class="font-medium mb-3">Nouvelle Analyse</h4>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Titre*</label>
+              <input
+                type="text"
+                [(ngModel)]="analysisPayload.title"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                [(ngModel)]="analysisPayload.description"
+                class="w-full p-2 border border-gray-300 rounded-md"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Fichier*</label>
+              <input
+                type="file"
+                (change)="onAnalysisFileChange($event)"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="flex justify-end gap-2">
+              <button
+                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                data-bs-toggle="collapse"
+                data-bs-target="#analysisFormCollapse"
+              >
+                Annuler
+              </button>
+              <button
+                (click)="uploadAnalysis()"
+                [disabled]="!analysisPayload.title || !analysisFile"
+                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analyses List -->
+        <div *ngIf="patientProfile.analyses && patientProfile.analyses.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let analysis of patientProfile.analyses" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between mb-2">
+              <h4 class="font-medium">{{ analysis.title }}</h4>
+              <span class="text-sm text-gray-500">{{ analysis.uploadDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">{{ analysis.description }}</p>
+            <button
+              (click)="viewAnalysisDetails(analysis.id)"
+              class="text-blue-600 hover:text-blue-800 text-sm"
+            >
+              Voir l'analyse
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!patientProfile.analyses || patientProfile.analyses.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucune analyse enregistrée</p>
+        </div>
+      </div>
+
+      <!-- Surgeries Section -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-medium">Chirurgies</h3>
+          <button
+            class="text-purple-600 hover:text-purple-800"
+            data-bs-toggle="collapse"
+            data-bs-target="#surgeryFormCollapse"
+          >
+            + Ajouter
+          </button>
+        </div>
+
+        <!-- Surgery Upload Form -->
+        <div class="collapse mb-4" id="surgeryFormCollapse">
+          <div class="border rounded-lg p-4 bg-gray-50">
+            <h4 class="font-medium mb-3">Nouvelle Chirurgie</h4>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Titre*</label>
+              <input
+                type="text"
+                [(ngModel)]="surgeryPayload.title"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+              <textarea
+                [(ngModel)]="surgeryPayload.description"
+                class="w-full p-2 border border-gray-300 rounded-md"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Fichier (optionnel)</label>
+              <input
+                type="file"
+                (change)="onSurgeryFileChange($event)"
+                class="w-full p-2 border border-gray-300 rounded-md"
+              >
+            </div>
+            <div class="flex justify-end gap-2">
+              <button
+                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                data-bs-toggle="collapse"
+                data-bs-target="#surgeryFormCollapse"
+              >
+                Annuler
+              </button>
+              <button
+                (click)="uploadSurgery()"
+                [disabled]="!surgeryPayload.title || !surgeryPayload.description"
+                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Surgeries List -->
+        <div *ngIf="patientProfile.surgeries && patientProfile.surgeries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let surgery of patientProfile.surgeries" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between mb-2">
+              <h4 class="font-medium">{{ surgery.title }}</h4>
+              <span class="text-sm text-gray-500">{{ surgery.uploadDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">{{ surgery.description }}</p>
+            <button
+              (click)="viewSurgeryDetails(surgery.id)"
+              class="text-blue-600 hover:text-blue-800 text-sm"
+            >
+              Voir les détails
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!patientProfile.surgeries || patientProfile.surgeries.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucune chirurgie enregistrée</p>
+        </div>
+      </div>
+
+      <!-- Vaccinations Section -->
       <div>
-        <p><strong>Email:</strong> {{ patientProfile.email }}</p>
-        <p><strong>Contact d'urgence:</strong> {{ patientProfile.emergencyContact || 'Non renseigné' }}</p>
-        <p><strong>Adresse:</strong> {{ patientProfile.address || 'Non renseignée' }}</p>
-        <p><strong>Allergies:</strong> {{ patientProfile.allergies || 'Aucune' }}</p>
-        <p><strong>Maladies chroniques:</strong> {{ patientProfile.chronicDiseases || 'Aucune' }}</p>
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-medium">Vaccinations</h3>
+          <button
+            class="text-purple-600 hover:text-purple-800"
+            data-bs-toggle="collapse"
+            data-bs-target="#vaccinationFormCollapse"
+          >
+            + Ajouter
+          </button>
+        </div>
+
+        <!-- Vaccination Form -->
+        <div class="collapse mb-4" id="vaccinationFormCollapse">
+          <div class="border rounded-lg p-4 bg-gray-50">
+            <h4 class="font-medium mb-3">Nouvelle Vaccination</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nom du vaccin*</label>
+                <input
+                  type="text"
+                  [(ngModel)]="vaccination.vaccineName"
+                  class="w-full p-2 border border-gray-300 rounded-md"
+                >
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Numéro de dose*</label>
+                <input
+                  type="number"
+                  [(ngModel)]="vaccination.doseNumber"
+                  class="w-full p-2 border border-gray-300 rounded-md"
+                  min="1"
+                >
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fabricant*</label>
+                <input
+                  type="text"
+                  [(ngModel)]="vaccination.manufacturer"
+                  class="w-full p-2 border border-gray-300 rounded-md"
+                >
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date*</label>
+                <input
+                  type="date"
+                  [(ngModel)]="vaccination.date"
+                  class="w-full p-2 border border-gray-300 rounded-md"
+                >
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-3">
+              <button
+                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                data-bs-toggle="collapse"
+                data-bs-target="#vaccinationFormCollapse"
+              >
+                Annuler
+              </button>
+              <button
+                (click)="addVaccination()"
+                [disabled]="!vaccination.vaccineName || !vaccination.manufacturer || !vaccination.date"
+                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vaccinations List -->
+        <div *ngIf="patientProfile.vaccinations && patientProfile.vaccinations.length > 0">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vaccin</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dose</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fabricant</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let vacc of patientProfile.vaccinations">
+              <td class="px-6 py-4 whitespace-nowrap">{{ vacc.vaccineName }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ vacc.doseNumber }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ vacc.manufacturer }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ vacc.vaccinationDate | date:'dd/MM/yyyy' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="!patientProfile.vaccinations || patientProfile.vaccinations.length === 0" class="text-center py-2">
+          <p class="text-gray-500">Aucune vaccination enregistrée</p>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Consultations Table -->
-  <div *ngIf="patientProfile.medicalRecords?.length" class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Consultations</h2>
-    <table class="w-full text-sm">
-      <thead class="bg-gray-100">
-      <tr>
-        <th class="p-2">Date</th>
-        <th class="p-2">Motif</th>
-        <th class="p-2">Diagnostic</th>
-        <th class="p-2">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let record of patientProfile.medicalRecords" class="border-b">
-        <td class="p-2">{{ record.creationDate | date: 'shortDate' }}</td>
-        <td class="p-2">{{ record.reason }}</td>
-        <td class="p-2">{{ record.diagnosis }}</td>
-        <td class="p-2">
-          <button class="text-blue-600" (click)="viewConsultationDetails(record.id)">Voir</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Prescriptions Table -->
-  <div *ngIf="patientProfile.prescriptions?.length" class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Ordonnances</h2>
-    <table class="w-full text-sm">
-      <thead class="bg-gray-100">
-      <tr>
-        <th class="p-2">Date</th>
-        <th class="p-2">Médicaments</th>
-        <th class="p-2">Permanent</th>
-        <th class="p-2">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let prescription of patientProfile.prescriptions" class="border-b">
-        <td class="p-2">{{ prescription.prescribedDate | date: 'shortDate' }}</td>
-        <td class="p-2">
-          <ul>
-            <li *ngFor="let med of prescription.medications">{{ med.name }}</li>
-          </ul>
-        </td>
-        <td class="p-2">{{ prescription.permanent ? 'Oui' : 'Non' }}</td>
-        <td class="p-2">
-          <button class="text-blue-600" (click)="viewPrescriptionDetails(prescription.id)">Voir</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Scans Table -->
-  <div *ngIf="patientProfile.scans?.length" class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Scans</h2>
-    <table class="w-full text-sm">
-      <thead class="bg-gray-100">
-      <tr>
-        <th class="p-2">Titre</th>
-        <th class="p-2">Date</th>
-        <th class="p-2">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let scan of patientProfile.scans" class="border-b">
-        <td class="p-2">{{ scan.title }}</td>
-        <td class="p-2">{{ scan.uploadDate | date: 'shortDate' }}</td>
-        <td class="p-2">
-          <button class="text-blue-600" (click)="viewScanDetails(scan.id)">Voir</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
   </div>
 </div>

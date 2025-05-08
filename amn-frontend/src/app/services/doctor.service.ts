@@ -59,10 +59,17 @@ export class DoctorService {
   }
 
   // ✅ With consultation (recordId)
-  submitPrescriptionWithMedications(patientId: number, recordId: number, request: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/consultation/${patientId}/${recordId}/prescription`, request, {
-      headers: this.getHeaders()
-    });
+
+  submitPrescriptionWithMedications(
+    patientId: number,
+    recordId: number,
+    request: any
+  ): Observable<any> {
+    return this.http.post(
+      `${this.API_URL}/consultation/${patientId}/${recordId}/prescription`,
+      request,
+      { headers: this.getHeaders() }
+    );
   }
 
 

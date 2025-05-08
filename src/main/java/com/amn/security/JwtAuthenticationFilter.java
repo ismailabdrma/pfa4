@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 @Component
@@ -28,18 +29,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         final String jwt = authHeader.substring(7);
-        final String username = jwtService.extractUsername(jwt);
+        String username = null;
+
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            System.out.println("JWT Parsing Error: " + e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails;
 
-            // ✅ Added crucial token validation check
+            try {
+                userDetails = this.userDetailsService.loadUserByUsername(username);
+            } catch (Exception e) {
+                System.out.println("User not found: " + e.getMessage());
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (jwtService.isTokenValid(jwt, username)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(

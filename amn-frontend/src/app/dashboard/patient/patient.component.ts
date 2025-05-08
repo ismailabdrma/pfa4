@@ -1,25 +1,44 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PatientService } from 'src/app/services/PatientService';
+import { PatientProfileDTO } from 'src/app/models/patient-profile.dto';
 
 @Component({
   selector: 'app-patient',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './patient.component.html'
+  templateUrl: './patient.component.html',
+  styleUrls: ['./patient.component.css']
 })
-export class PatientComponent {
-  profile: any = null;
+export class PatientComponent implements OnInit {
+  patientProfile: PatientProfileDTO | null = null;
+  cin = '';
+  errorMessage = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private patientService: PatientService) {}
 
-  ngOnInit() {
-    this.http.get('/api/patient/me').subscribe({
-      next: (data) => {
-        this.profile = data;
+  ngOnInit(): void {}
+
+  /**
+   * Fetch patient profile by CIN
+   */
+  getPatientProfile(): void {
+    if (!this.cin.trim()) {
+      this.errorMessage = 'CIN requis';
+      this.patientProfile = null;
+      return;
+    }
+
+    this.patientService.getPatientProfile(this.cin).subscribe({
+      next: (data: PatientProfileDTO) => {
+        this.patientProfile = data;
+        this.errorMessage = '';
       },
-      error: () => alert('Erreur lors du chargement du profil')
+      error: () => {
+        this.errorMessage = 'Aucun dossier trouvé pour ce CIN.';
+        this.patientProfile = null;
+      }
     });
   }
 }

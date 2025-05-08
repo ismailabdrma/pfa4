@@ -17,28 +17,32 @@ export class AuthService {
    * ✅ Register Patient
    */
   registerPatient(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, { ...data, role: 'PATIENT' });
+    const payload = { ...data, role: 'PATIENT' };
+    return this.http.post(`${this.apiUrl}/register`, payload);
   }
 
   /**
    * ✅ Register Doctor
    */
   registerDoctor(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, { ...data, role: 'DOCTOR' });
+    const payload = { ...data, role: 'DOCTOR' };
+    return this.http.post(`${this.apiUrl}/register`, payload);
   }
 
   /**
    * ✅ Register Pharmacist
    */
   registerPharmacist(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, { ...data, role: 'PHARMACIST' });
+    const payload = { ...data, role: 'PHARMACIST' };
+    return this.http.post(`${this.apiUrl}/register`, payload);
   }
 
   /**
    * ✅ Register Admin
    */
   registerAdmin(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, { ...data, role: 'ADMIN' });
+    const payload = { ...data, role: 'ADMIN' };
+    return this.http.post(`${this.apiUrl}/register`, payload);
   }
 
   /**

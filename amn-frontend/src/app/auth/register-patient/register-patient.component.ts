@@ -42,10 +42,15 @@ export class RegisterPatientComponent {
       return;
     }
 
-    const payload = this.registerForm.value;
+    const payload = {
+      ...this.registerForm.value,
+      name: this.registerForm.value.fullName
+    };
 
     this.authService.registerPatient(payload).subscribe({
       next: () => {
+        alert('Registration successful! Please log in.');
+        this.registerForm.reset();
         this.router.navigate(['/login']);
       },
       error: (err) => {
@@ -54,4 +59,6 @@ export class RegisterPatientComponent {
       }
     });
   }
+
 }
+

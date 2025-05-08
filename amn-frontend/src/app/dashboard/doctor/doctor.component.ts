@@ -22,6 +22,14 @@ export class DoctorComponent implements OnInit {
   patientId: number | null = null;
   folderId: number | null = null;
 
+  // For collapsible sections
+  activeForms = {
+    scan: false,
+    analysis: false,
+    surgery: false,
+    vaccination: false
+  };
+
   // Manual form data
   manualData = {
     bloodType: '',
@@ -114,6 +122,20 @@ export class DoctorComponent implements OnInit {
     });
   }
 
+  // Toggle collapsible sections
+  toggleForm(form: 'scan' | 'analysis' | 'surgery' | 'vaccination'): void {
+    this.activeForms[form] = !this.activeForms[form];
+
+    // Close other forms when opening one
+    if (this.activeForms[form]) {
+      Object.keys(this.activeForms).forEach(key => {
+        if (key !== form) {
+          this.activeForms[key as keyof typeof this.activeForms] = false;
+        }
+      });
+    }
+  }
+
   addVaccination(): void {
     if (!this.folderId) return;
 
@@ -127,6 +149,7 @@ export class DoctorComponent implements OnInit {
       next: () => {
         alert("Vaccination ajoutée.");
         this.resetVaccinationForm();
+        this.activeForms.vaccination = false;
         this.searchPatient();
       },
       error: () => alert("Erreur lors de l'ajout de la vaccination.")
@@ -138,15 +161,21 @@ export class DoctorComponent implements OnInit {
   }
 
   onScanFileChange(e: any): void {
-    this.scanFile = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      this.scanFile = e.target.files[0];
+    }
   }
 
   onAnalysisFileChange(e: any): void {
-    this.analysisFile = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      this.analysisFile = e.target.files[0];
+    }
   }
 
   onSurgeryFileChange(e: any): void {
-    this.surgeryFile = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      this.surgeryFile = e.target.files[0];
+    }
   }
 
   uploadScan(): void {
@@ -161,6 +190,7 @@ export class DoctorComponent implements OnInit {
       next: () => {
         alert("Scan ajouté.");
         this.resetScanForm();
+        this.activeForms.scan = false;
         this.searchPatient();
       },
       error: () => alert("Erreur lors de l'ajout du scan.")
@@ -179,6 +209,7 @@ export class DoctorComponent implements OnInit {
       next: () => {
         alert("Analyse ajoutée.");
         this.resetAnalysisForm();
+        this.activeForms.analysis = false;
         this.searchPatient();
       },
       error: () => alert("Erreur lors de l'ajout de l'analyse.")
@@ -199,6 +230,7 @@ export class DoctorComponent implements OnInit {
       next: () => {
         alert("Chirurgie ajoutée.");
         this.resetSurgeryForm();
+        this.activeForms.surgery = false;
         this.searchPatient();
       },
       error: () => alert("Erreur lors de l'ajout de la chirurgie.")
@@ -220,6 +252,14 @@ export class DoctorComponent implements OnInit {
     this.surgeryFile = null;
   }
 
+  // Navigation methods
+  navigateToConsultation(): void {
+    if (!this.patientProfile) return;
+
+    // Use the correct route path that matches your app.routes.ts
+    this.router.navigate(['/dashboard/doctor/consultation-prescription', this.patientProfile.cin, this.patientProfile.fullName]);
+  }
+
   viewScanDetails(id: number): void {
     this.router.navigate(['/dashboard/doctor/scan', id]);
   }
@@ -238,5 +278,11 @@ export class DoctorComponent implements OnInit {
 
   viewPrescriptionDetails(id: number): void {
     this.router.navigate(['/dashboard/doctor/prescription', id]);
+  }
+
+  logout(): void {
+    // Implement logout functionality
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
   }
 }

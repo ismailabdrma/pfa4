@@ -1,46 +1,142 @@
-<div class="p-6 space-y-6">
-  <h1 class="text-2xl font-bold">Ajouter une Consultation et Ordonnance</h1>
+<div class="container mx-auto p-4 max-w-4xl">
+  <h1 class="text-2xl font-bold mb-6">Nouvelle Consultation et Ordonnance</h1>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="flex justify-center py-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+    <p>Consultation et ordonnance enregistrées avec succès! Redirection vers le tableau de bord...</p>
+  </div>
 
   <!-- Patient Info -->
-  <div class="bg-white shadow p-4 rounded">
-    <h2 class="text-xl font-semibold mb-2">Patient</h2>
-    <p><strong>CIN :</strong> {{ cin }}</p>
-    <p><strong>Nom complet :</strong> {{ fullName }}</p>
+  <div *ngIf="!loading && !success" class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Informations du Patient</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <p><span class="font-medium">CIN:</span> {{ cin }}</p>
+      </div>
+      <div>
+        <p><span class="font-medium">Nom complet:</span> {{ fullName }}</p>
+      </div>
+    </div>
   </div>
 
   <!-- Consultation Form -->
-  <div *ngIf="patientId" class="bg-white shadow p-4 rounded">
-    <h2 class="text-xl font-semibold mb-2">Nouvelle Consultation</h2>
-    <textarea [(ngModel)]="record.reason" placeholder="Motif" class="w-full border p-2 rounded mb-2"></textarea>
-    <textarea [(ngModel)]="record.diagnosis" placeholder="Diagnostic" class="w-full border p-2 rounded mb-2"></textarea>
-    <textarea [(ngModel)]="record.notes" placeholder="Notes" class="w-full border p-2 rounded"></textarea>
+  <div *ngIf="patientId && !loading && !success" class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Détails de la Consultation</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Motif*</label>
+        <textarea
+          [(ngModel)]="record.reason"
+          rows="2"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+          placeholder="Motif de la consultation"
+          required
+        ></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Diagnostic*</label>
+        <textarea
+          [(ngModel)]="record.diagnosis"
+          rows="3"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+          placeholder="Diagnostic"
+          required
+        ></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes supplémentaires</label>
+        <textarea
+          [(ngModel)]="record.notes"
+          rows="3"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+          placeholder="Notes, remarques, instructions (optionnel)"
+        ></textarea>
+      </div>
+    </div>
   </div>
 
   <!-- Prescription Form -->
-  <div *ngIf="patientId" class="bg-white shadow p-4 rounded">
-    <h2 class="text-xl font-semibold mb-2">Ordonnance</h2>
-    <div *ngFor="let med of medications; let i = index" class="mb-4 border p-2 rounded">
-      <h3 class="font-medium">Médicament {{ i + 1 }}</h3>
-      <input [(ngModel)]="med.name" placeholder="Nom" class="border p-2 w-full rounded mb-1" />
-      <input [(ngModel)]="med.dosage" placeholder="Dosage" class="border p-2 w-full rounded mb-1" />
-      <input [(ngModel)]="med.period" placeholder="Durée" class="border p-2 w-full rounded mb-1" />
-      <label class="inline-flex items-center mt-1">
-        <input type="checkbox" [(ngModel)]="med.permanent" class="mr-2" />
-        Permanent
-      </label>
-      <button (click)="removeMedication(i)" class="text-red-600 mt-2">Supprimer</button>
+  <div *ngIf="patientId && !loading && !success" class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Ordonnance</h2>
+
+    <div *ngFor="let med of medications; let i = index" class="mb-6 border p-4 rounded-md">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-medium">Médicament {{ i + 1 }}</h3>
+        <button
+          (click)="removeMedication(i)"
+          class="text-red-600 hover:text-red-800 text-sm"
+          [disabled]="medications.length === 1 && !med.name && !med.dosage"
+        >
+          Supprimer
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom du médicament*</label>
+          <input
+            [(ngModel)]="med.name"
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+            placeholder="Nom du médicament"
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dosage*</label>
+          <input
+            [(ngModel)]="med.dosage"
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+            placeholder="Ex: 500mg, 2 comprimés"
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Période</label>
+          <input
+            [(ngModel)]="med.period"
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-600"
+            placeholder="Ex: 7 jours, 2 semaines"
+          />
+        </div>
+        <div class="flex items-center">
+          <label class="inline-flex items-center mt-4">
+            <input
+              type="checkbox"
+              [(ngModel)]="med.permanent"
+              class="form-checkbox h-5 w-5 text-purple-600"
+            />
+            <span class="ml-2">Traitement permanent</span>
+          </label>
+        </div>
+      </div>
     </div>
-    <button (click)="addMedication()" class="bg-green-600 text-white px-4 py-2 rounded">
-      + Ajouter un Médicament
+
+    <button
+      (click)="addMedication()"
+      class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm"
+    >
+      + Ajouter un médicament
     </button>
   </div>
 
-  <!-- Submit Button -->
-  <button
-    *ngIf="patientId"
-    (click)="submit()"
-    class="bg-purple-700 text-white px-6 py-2 rounded"
-  >
-    Enregistrer Consultation & Ordonnance
-  </button>
+  <!-- Action Buttons -->
+  <div *ngIf="patientId && !loading && !success" class="flex justify-between mt-6">
+    <button
+      (click)="cancel()"
+      class="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+    >
+      Annuler
+    </button>
+    <button
+      (click)="submit()"
+      class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-md"
+    >
+      Enregistrer
+    </button>
+  </div>
 </div>
