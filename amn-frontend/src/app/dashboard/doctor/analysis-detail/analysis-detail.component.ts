@@ -1,34 +1,37 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { DoctorService } from 'src/app/services/doctor.service';
 
 @Component({
   selector: 'app-analysis-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './analysis-detail.component.html'
+  imports: [CommonModule],
+  template: `
+    <div *ngIf="analysis">
+      <h2>Détails de l'analyse</h2>
+      <p><strong>Titre:</strong> {{ analysis.title }}</p>
+      <p><strong>Description:</strong> {{ analysis.description }}</p>
+      <p><strong>Date:</strong> {{ analysis.uploadDate }}</p>
+      <img *ngIf="analysis.url" [src]="analysis.url" alt="Fichier analyse" width="500" />
+    </div>
+  `
 })
 export class AnalysisDetailComponent implements OnInit {
-  analysis: any = null;
-  error: string | null = null;
+  analysis: any;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+  constructor(
+    private route: ActivatedRoute,
+    private doctorService: DoctorService
+  ) {}
 
   ngOnInit(): void {
-    const analysisId = this.route.snapshot.paramMap.get('analysisId');
-    const token = localStorage.getItem('jwt') || '';
-
-    if (analysisId) {
-      this.http.get(`http://localhost:8080/api/doctor/analysis/${analysisId}`, {
-        headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` })
-      }).subscribe({
-        next: (data: any) => this.analysis = data,
-        error: () => this.error = 'Erreur lors du chargement de l’analyse.'
+    const id = this.route.snapshot.paramMap.get('analysisId');
+    if (id) {
+      this.doctorService.getAnalysisById(+id).subscribe({
+        next: (data) => this.analysis = data,
+        error: () => alert("Analyse introuvable.")
       });
-    } else {
-      this.error = 'Aucun ID d’analyse fourni.';
     }
   }
 }

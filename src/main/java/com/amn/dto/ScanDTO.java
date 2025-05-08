@@ -15,19 +15,16 @@ public class ScanDTO {
     private Long id;
     private String title;
     private String description;
-    private LocalDate uploadDate;
-    private String fileType;
     private String url;
+    private String uploadDate;
 
     public static ScanDTO fromEntity(Scan scan) {
-        return ScanDTO.builder()
-                .id(scan.getId())
-                .title(scan.getTitle())
-                .description(scan.getDescription())
-                .uploadDate(scan.getUploadDate())
-                .fileType(scan.getFileType().name()) // ✅ Fixed here
-                .url(scan.getUrl())
-                .build();
+        ScanDTO dto = new ScanDTO();
+        dto.setId(scan.getId());
+        dto.setTitle(scan.getTitle());
+        dto.setDescription(scan.getDescription());
+        dto.setUploadDate(scan.getUploadDate().toString());
+        dto.setUrl(scan.getUrl());
+        return dto;
     }
 }
-

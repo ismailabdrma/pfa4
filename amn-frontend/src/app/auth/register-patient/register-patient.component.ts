@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-register-patient',
   standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register-patient.component.html',
-  styleUrls: ['./register-patient.component.css'],
-  imports: [CommonModule, ReactiveFormsModule]
+  styleUrls: ['./register-patient.component.css']
 })
 export class RegisterPatientComponent {
-  patientForm!: FormGroup;
+  registerForm: FormGroup;
   errorMessage: string = '';
 
   constructor(
@@ -20,35 +20,37 @@ export class RegisterPatientComponent {
     private authService: AuthService,
     private router: Router
   ) {
-    // ✅ Initialize the form
-    this.patientForm = this.fb.group({
+    this.registerForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       phone: ['', Validators.required],
-      cin: ['', Validators.required]
+      cin: ['', Validators.required],
+      birthDate: ['', Validators.required],
+      bloodType: ['', Validators.required],
+      emergencyContact: ['', Validators.required],
+      allergies: [''],
+      chronicDiseases: [''],
+      hasHeartProblem: [false],
+      hasSurgery: [false]
     });
   }
 
-  onSubmit() {
-    if (this.patientForm.invalid) return;
+  onSubmit(): void {
+    if (this.registerForm.invalid) {
+      this.errorMessage = "Please fill in all required fields.";
+      return;
+    }
 
-    const payload = {
-      name: this.patientForm.value.fullName,
-      email: this.patientForm.value.email,
-      password: this.patientForm.value.password,
-      phone: this.patientForm.value.phone,
-      cin: this.patientForm.value.cin,
-      role: 'PATIENT'
-    };
+    const payload = this.registerForm.value;
 
-    this.authService.register(payload).subscribe({
-      next: (res) => {
-        this.authService.saveToken(res.token);
-        this.authService.redirectToDashboard();
+    this.authService.registerPatient(payload).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
       },
-      error: () => {
-        this.errorMessage = 'Registration failed. Try again.';
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Registration failed. Please try again.';
       }
     });
   }

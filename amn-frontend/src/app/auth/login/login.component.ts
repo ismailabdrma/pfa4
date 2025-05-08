@@ -13,7 +13,7 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  errorMessage = '';
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -26,18 +26,46 @@ export class LoginComponent {
     });
   }
 
+  /**
+   * ✅ Handle Login Submission
+   */
   onSubmit(): void {
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      this.errorMessage = 'Veuillez saisir un email et un mot de passe valides.';
+      return;
+    }
 
-    const loginData = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
 
-    this.authService.login(loginData).subscribe({
-      next: () => {
-        this.authService.setPendingEmail(loginData.email);
-        this.router.navigate(['/verify-otp']);
+    this.authService.login({ email, password }).subscribe({
+      next: (response: any) => {
+        const { token, role, status } = response;
+
+        if (token && role === 'ADMIN') {
+          // ✅ Admin - Immediate redirection to dashboard
+          this.authService.saveToken(token);
+          this.authService.redirectToDashboard(role);
+        }
+        else if (status === 'APPROVED' && (role === 'DOCTOR' || role === 'PHARMACIST')) {
+          // ✅ Approved Doctor/Pharmacist - Redirect to OTP verification
+          this.authService.setPendingEmail(email);
+          this.router.navigate(['/verify-otp']);
+        }
+        else if (status === 'PENDING' && (role === 'DOCTOR' || role === 'PHARMACIST')) {
+          this.errorMessage = 'Votre compte est en attente d\'approbation par l\'administrateur.';
+        }
+        else if (role === 'PATIENT') {
+          // ✅ Patient - Proceed to OTP verification
+          this.authService.setPendingEmail(email);
+          this.router.navigate(['/verify-otp']);
+        }
+        else {
+          this.errorMessage = 'Rôle utilisateur non reconnu ou réponse invalide.';
+        }
       },
-      error: () => {
-        this.errorMessage = 'Email ou mot de passe invalide.';
+      error: (err) => {
+        console.error('Login Error:', err);
+        this.errorMessage = err?.error?.message || 'Email ou mot de passe invalide.';
       }
     });
   }

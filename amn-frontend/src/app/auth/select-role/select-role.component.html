@@ -1,7 +1,21 @@
-// src/app/auth/select-role/select-role.component.html
-<div class="role-selection">
-  <h2>Choisissez votre type d'utilisateur</h2>
-  <button (click)="chooseRole('PATIENT')">Particulier (Patient)</button>
-  <button (click)="chooseRole('DOCTOR')">Professionnel (Médecin)</button>
-  <button (click)="chooseRole('PHARMACIST')">Professionnel (Pharmacien)</button>
+<div class="role-selection p-6 bg-gray-100 rounded-lg shadow-lg">
+  <h2 class="text-xl font-semibold mb-4">Choisissez votre type d'utilisateur</h2>
+
+  <div class="flex flex-col space-y-2">
+    <button (click)="chooseRole('PATIENT')" class="bg-blue-500 text-white py-2 px-4 rounded">
+      Particulier (Patient)
+    </button>
+
+    <button (click)="chooseRole('DOCTOR')" class="bg-green-500 text-white py-2 px-4 rounded">
+      Professionnel (Médecin)
+    </button>
+
+    <button (click)="chooseRole('PHARMACIST')" class="bg-indigo-500 text-white py-2 px-4 rounded">
+      Professionnel (Pharmacien)
+    </button>
+
+    <button (click)="chooseRole('ADMIN')" class="bg-red-500 text-white py-2 px-4 rounded">
+      Admin
+    </button>
+  </div>
 </div>

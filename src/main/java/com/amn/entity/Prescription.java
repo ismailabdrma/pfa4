@@ -1,10 +1,13 @@
 package com.amn.entity;
 
 import com.amn.entity.enums.PrescriptionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,11 +26,13 @@ public class Prescription {
     private boolean permanent;
 
     private LocalDateTime prescribedDate;
+    private LocalDateTime dispensedDate;
 
     @Enumerated(EnumType.STRING)
     private PrescriptionStatus status;
 
     @ManyToOne
+    @JsonIgnore
     private Patient patient;
 
     @ManyToOne
@@ -38,7 +43,15 @@ public class Prescription {
 
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
+    @JsonIgnore
     private MedicalFolder medicalFolder;
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Medication> medications = new ArrayList<>();
+    @ManyToOne
+
+    @JoinColumn(name = "medical_record_id")
+    @JsonIgnore
+    private MedicalRecord medicalRecord;
 // 🔥 THIS FIXES THE ERROR
 
 }

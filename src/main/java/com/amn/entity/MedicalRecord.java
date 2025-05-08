@@ -33,6 +33,7 @@ public class MedicalRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
+    @JsonIgnore
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)

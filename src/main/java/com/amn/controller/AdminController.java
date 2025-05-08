@@ -1,11 +1,14 @@
 package com.amn.controller;
 
-import com.amn.entity.Doctor;
-import com.amn.entity.Pharmacist;
+import com.amn.dto.DoctorDTO;
+import com.amn.dto.PharmacistDTO;
+import com.amn.dto.UserDTO;
 import com.amn.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -14,29 +17,87 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // ✅ Approve a doctor
+    /**
+     * ✅ Approve Doctor
+     */
     @PostMapping("/approve-doctor/{id}")
-    public ResponseEntity<Doctor> approveDoctor(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.approveDoctor(id));
+    public ResponseEntity<DoctorDTO> approveDoctor(@PathVariable Long id) {
+        DoctorDTO approvedDoctor = adminService.approveDoctor(id);
+        return ResponseEntity.ok(approvedDoctor);
     }
 
-    // ✅ Approve a pharmacist
+    /**
+     * ✅ Approve Pharmacist
+     */
     @PostMapping("/approve-pharmacist/{id}")
-    public ResponseEntity<Pharmacist> approvePharmacist(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.approvePharmacist(id));
+    public ResponseEntity<PharmacistDTO> approvePharmacist(@PathVariable Long id) {
+        PharmacistDTO approvedPharmacist = adminService.approvePharmacist(id);
+        return ResponseEntity.ok(approvedPharmacist);
     }
 
-    // ✅ Reject (delete) a registration
-    @DeleteMapping("/reject/{id}")
-    public ResponseEntity<String> rejectRegistration(@PathVariable Long id) {
-        adminService.rejectRegistration(id);
-        return ResponseEntity.ok("Registration rejected and user deleted.");
+    /**
+     * ✅ Get Pending Doctors
+     */
+    @GetMapping("/pending-doctors")
+    public ResponseEntity<List<DoctorDTO>> getPendingDoctors() {
+        List<DoctorDTO> pendingDoctors = adminService.getPendingDoctors();
+        return ResponseEntity.ok(pendingDoctors);
     }
 
-    // ✅ Delete user (same as reject)
+    /**
+     * ✅ Get Pending Pharmacists
+     */
+    @GetMapping("/pending-pharmacists")
+    public ResponseEntity<List<PharmacistDTO>> getPendingPharmacists() {
+        List<PharmacistDTO> pendingPharmacists = adminService.getPendingPharmacists();
+        return ResponseEntity.ok(pendingPharmacists);
+    }
+
+    /**
+     * ✅ Get All Doctors
+     */
+    @GetMapping("/doctors")
+    public ResponseEntity<List<DoctorDTO>> getAllDoctors() {
+        List<DoctorDTO> doctors = adminService.getAllDoctors();
+        return ResponseEntity.ok(doctors);
+    }
+
+    /**
+     * ✅ Get All Pharmacists
+     */
+    @GetMapping("/pharmacists")
+    public ResponseEntity<List<PharmacistDTO>> getAllPharmacists() {
+        List<PharmacistDTO> pharmacists = adminService.getAllPharmacists();
+        return ResponseEntity.ok(pharmacists);
+    }
+
+    /**
+     * ✅ Get All Users (Patients Only)
+     */
+    // ✅ Get All Patients
+    @GetMapping("/patients")
+    public ResponseEntity<List<UserDTO>> getAllPatients() {
+        List<UserDTO> patients = adminService.getAllPatients();
+        return ResponseEntity.ok(patients);
+    }
+
+
+    /**
+     * ✅ Suspend User (Doctor/Pharmacist Only)
+     */
+    @PatchMapping("/suspend/{id}")
+    public ResponseEntity<String> suspendUser(@PathVariable Long id) {
+        adminService.suspendUser(id);
+        return ResponseEntity.ok("User suspended successfully.");
+    }
+
+    /**
+     * ✅ Delete User (Doctor/Pharmacist Only)
+     */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully.");
     }
+
 }

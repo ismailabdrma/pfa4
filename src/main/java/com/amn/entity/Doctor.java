@@ -2,6 +2,7 @@ package com.amn.entity;
 
 import com.amn.entity.enums.AccountStatus;
 import com.amn.entity.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -29,8 +30,10 @@ public class Doctor extends User {
     private Admin approvedBy;
 
     @OneToMany(mappedBy = "doctor")
+    @JsonIgnore
     private List<MedicalRecord> createdRecords;
     @OneToMany(mappedBy = "prescribingDoctor", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Prescription> prescriptions;
 
 

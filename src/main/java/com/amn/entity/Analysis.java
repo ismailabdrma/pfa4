@@ -1,6 +1,8 @@
 package com.amn.entity;
 
 import com.amn.entity.enums.FileType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -31,5 +33,7 @@ public class Analysis {
 
     @ManyToOne
     @JoinColumn(name = "medical_folder_id")
+    @JsonBackReference
+    @JsonIgnore// Prevents infinite loop
     private MedicalFolder medicalFolder;
 }

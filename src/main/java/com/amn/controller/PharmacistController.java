@@ -1,8 +1,6 @@
-// ✅ PharmacistController.java
 package com.amn.controller;
 
-import com.amn.entity.Medication;
-import com.amn.entity.Prescription;
+import com.amn.dto.PrescriptionDTO;
 import com.amn.service.PharmacistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,31 +15,42 @@ public class PharmacistController {
 
     private final PharmacistService pharmacistService;
 
-    // ✅ View prescriptions by patient CIN and name
-    @GetMapping("/prescriptions/by-patient")
-    public ResponseEntity<List<Prescription>> getPrescriptionsByCinAndName(
+    /**
+     * ✅ Get prescriptions for a patient by CIN and Full Name.
+     * Optional query parameter `status` can be `ALL` or `DISPENSED`.
+     */
+    @GetMapping("/prescriptions")
+    public ResponseEntity<List<PrescriptionDTO>> getPrescriptionsByPatient(
             @RequestParam String cin,
-            @RequestParam String fullName
-    ) {
-        return ResponseEntity.ok(pharmacistService.viewPrescriptionsByPatient(cin, fullName));
+            @RequestParam String fullName,
+            @RequestParam(defaultValue = "ALL") String status) {
+
+        List<PrescriptionDTO> prescriptions;
+
+        if ("DISPENSED".equalsIgnoreCase(status)) {
+            prescriptions = pharmacistService.getDispensedPrescriptionsByCinAndName(cin, fullName);
+        } else {
+            prescriptions = pharmacistService.getPrescriptionsByCinAndName(cin, fullName);
+        }
+
+        return ResponseEntity.ok(prescriptions);
     }
 
-    // ✅ Dispense prescription
-    @PostMapping("/dispense")
-    public ResponseEntity<Prescription> dispensePrescription(
-            @RequestParam Long prescriptionId,
-            @RequestParam Long pharmacistId
-    ) {
-        return ResponseEntity.ok(pharmacistService.dispensePrescription(prescriptionId, pharmacistId));
+    /**
+     * ✅ Mark a prescription as DISPENSED
+     */
+    @PutMapping("/prescriptions/{id}/dispense")
+    public ResponseEntity<PrescriptionDTO> markAsDispensed(@PathVariable Long id) {
+        PrescriptionDTO updatedPrescription = pharmacistService.markAsDispensed(id);
+        return ResponseEntity.ok(updatedPrescription);
     }
 
-    // ✅ Add OTC medication + log it as a prescription
-    @PostMapping("/add-otc")
-    public ResponseEntity<Medication> addOTC(
-            @RequestBody Medication medication,
-            @RequestParam Long pharmacistId,
-            @RequestParam Long patientId
-    ) {
-        return ResponseEntity.ok(pharmacistService.addOTCMedication(medication, pharmacistId, patientId));
+    /**
+     * ✅ Get a single prescription by ID
+     */
+    @GetMapping("/prescriptions/{id}")
+    public ResponseEntity<PrescriptionDTO> getPrescriptionById(@PathVariable Long id) {
+        PrescriptionDTO prescription = pharmacistService.getPrescriptionById(id);
+        return ResponseEntity.ok(prescription);
     }
 }

@@ -1,4 +1,3 @@
-// src/app/auth/select-role/select-role.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -11,6 +10,10 @@ export class SelectRoleComponent {
   constructor(private router: Router) {}
 
   chooseRole(role: string) {
-    this.router.navigate(['/auth-choice', role]);
+    if (['PATIENT', 'DOCTOR', 'PHARMACIST', 'ADMIN'].includes(role)) {
+      this.router.navigate(['/auth-choice', role]);
+    } else {
+      alert("Rôle non valide !");
+    }
   }
 }

@@ -1,16 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { DoctorService } from 'src/app/services/doctor.service';
 
 @Component({
   selector: 'app-doctor',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './doctor.component.html'
+  templateUrl: './doctor.component.html',
+  styleUrls: ['./doctor.component.css']
 })
-export class DoctorComponent {
+export class DoctorComponent implements OnInit {
+  doctorName = '';
+  doctorEmail = '';
   cin = '';
   fullName = '';
   patientProfile: any = null;
@@ -18,6 +22,7 @@ export class DoctorComponent {
   patientId: number | null = null;
   folderId: number | null = null;
 
+  // Manual form data
   manualData = {
     bloodType: '',
     emergencyContact: '',
@@ -28,24 +33,7 @@ export class DoctorComponent {
     birthDate: ''
   };
 
-  medicalRecord = {
-    reason: '',
-    diagnosis: '',
-    notes: ''
-  };
-
-  prescription = {
-    medicines: '',
-    instructions: ''
-  };
-
-  scanPayload = { title: '', description: '' };
-  analysisPayload = { title: '', description: '' };
-  surgeryPayload = { title: '', description: '' };
-  scanFile: File | null = null;
-  analysisFile: File | null = null;
-  surgeryFile: File | null = null;
-
+  // Vaccination form data
   vaccination = {
     vaccineName: '',
     doseNumber: 1,
@@ -53,136 +41,82 @@ export class DoctorComponent {
     date: ''
   };
 
+  // Upload data
+  scanPayload = { title: '', description: '' };
+  analysisPayload = { title: '', description: '' };
+  surgeryPayload = { title: '', description: '' };
+
+  scanFile: File | null = null;
+  analysisFile: File | null = null;
+  surgeryFile: File | null = null;
+
   constructor(private doctorService: DoctorService, private router: Router) {}
 
-  searchPatient() {
+  ngOnInit(): void {
+    this.loadDoctorProfile();
+  }
+
+  loadDoctorProfile(): void {
+    this.doctorService.getCurrentDoctorProfile().subscribe({
+      next: (doctor) => {
+        this.doctorName = doctor.fullName || 'Docteur';
+        this.doctorEmail = doctor.email || '';
+      },
+      error: () => {
+        this.doctorName = 'Docteur';
+        this.doctorEmail = '';
+      }
+    });
+  }
+
+  searchPatient(): void {
     this.doctorService.getFullPatientProfile(this.cin, this.fullName).subscribe({
       next: (profile) => {
         this.patientProfile = profile;
         this.patientId = profile.id;
-        this.folderId = profile.medicalFolderId || null;
+        this.folderId = profile.medicalFolderId;
+
         this.showManualForm = !profile.bloodType || !profile.birthDate || !profile.emergencyContact;
       },
       error: (err) => {
         if (err.status === 404) {
           const confirmCreate = confirm("Patient introuvable. Créer un nouveau dossier ?");
           if (confirmCreate) {
-            this.doctorService.getPatientIdByCin(this.cin, this.fullName).subscribe({
-              next: (id) => {
-                this.patientId = id;
-                this.showManualForm = true;
-              },
-              error: () => alert("Impossible de trouver/créer l'utilisateur.")
-            });
+            this.createPatientProfile();
           }
         } else {
-          alert("Erreur lors de la recherche du patient.");
+          alert("Erreur lors de la recherche.");
         }
       }
     });
   }
 
-  submitManualFolder() {
+  createPatientProfile(): void {
+    this.doctorService.getPatientIdByCin(this.cin, this.fullName).subscribe({
+      next: (id) => {
+        this.patientId = id;
+        this.showManualForm = true;
+      },
+      error: () => alert("Impossible de créer ou retrouver le patient.")
+    });
+  }
+
+  submitManualFolder(): void {
     if (!this.patientId) return;
+
     this.doctorService.createOrUpdateMedicalFolder(this.cin, this.fullName, this.manualData).subscribe({
       next: () => {
         alert("Dossier mis à jour.");
         this.showManualForm = false;
         this.searchPatient();
       },
-      error: () => alert("Erreur mise à jour du dossier")
+      error: () => alert("Erreur lors de la mise à jour.")
     });
   }
 
-  createMedicalRecord() {
-    if (!this.patientId) return;
-    this.doctorService.createMedicalRecord(this.patientId, this.medicalRecord).subscribe({
-      next: () => {
-        alert('Consultation enregistrée');
-        this.searchPatient();
-      },
-      error: () => alert('Erreur ajout consultation')
-    });
-  }
-
-  writePrescription() {
-    if (!this.patientId) return;
-    this.doctorService.writePrescription(this.patientId, this.prescription).subscribe({
-      next: () => {
-        alert('Prescription enregistrée');
-        this.searchPatient();
-      },
-      error: () => alert('Erreur prescription')
-    });
-  }
-
-  onScanFileChange(event: any) {
-    this.scanFile = event.target.files[0];
-  }
-
-  onAnalysisFileChange(event: any) {
-    this.analysisFile = event.target.files[0];
-  }
-
-  onSurgeryFileChange(event: any) {
-    this.surgeryFile = event.target.files[0];
-  }
-
-  uploadScan() {
-    if (!this.folderId || !this.scanFile) return;
-    const formData = new FormData();
-    formData.append('file', this.scanFile);
-    formData.append('title', this.scanPayload.title);
-    formData.append('description', this.scanPayload.description);
-    this.doctorService.uploadScan(formData, this.folderId).subscribe({
-      next: () => {
-        alert('Scan ajouté');
-        this.scanFile = null;
-        this.scanPayload = { title: '', description: '' };
-        this.searchPatient();
-      },
-      error: () => alert('Erreur ajout scan')
-    });
-  }
-
-  uploadAnalysis() {
-    if (!this.folderId || !this.analysisFile) return;
-    const formData = new FormData();
-    formData.append('file', this.analysisFile);
-    formData.append('title', this.analysisPayload.title);
-    formData.append('description', this.analysisPayload.description);
-    this.doctorService.uploadAnalysis(formData, this.folderId).subscribe({
-      next: () => {
-        alert('Analyse ajoutée');
-        this.analysisFile = null;
-        this.analysisPayload = { title: '', description: '' };
-        this.searchPatient();
-      },
-      error: () => alert('Erreur ajout analyse')
-    });
-  }
-
-  uploadSurgery() {
+  addVaccination(): void {
     if (!this.folderId) return;
-    const formData = new FormData();
-    formData.append('title', this.surgeryPayload.title);
-    formData.append('description', this.surgeryPayload.description);
-    if (this.surgeryFile) {
-      formData.append('file', this.surgeryFile);
-    }
-    this.doctorService.uploadSurgery(formData, this.folderId).subscribe({
-      next: () => {
-        alert('Chirurgie ajoutée');
-        this.surgeryFile = null;
-        this.surgeryPayload = { title: '', description: '' };
-        this.searchPatient();
-      },
-      error: () => alert('Erreur ajout chirurgie')
-    });
-  }
 
-  addVaccination() {
-    if (!this.folderId) return;
     this.doctorService.addVaccination(
       this.folderId,
       this.vaccination.vaccineName,
@@ -191,31 +125,118 @@ export class DoctorComponent {
       this.vaccination.date
     ).subscribe({
       next: () => {
-        alert('Vaccination enregistrée');
-        this.vaccination = { vaccineName: '', doseNumber: 1, manufacturer: '', date: '' };
+        alert("Vaccination ajoutée.");
+        this.resetVaccinationForm();
         this.searchPatient();
       },
-      error: () => alert('Erreur ajout vaccination')
+      error: () => alert("Erreur lors de l'ajout de la vaccination.")
     });
   }
 
-  viewScanDetails(id: number) {
+  resetVaccinationForm(): void {
+    this.vaccination = { vaccineName: '', doseNumber: 1, manufacturer: '', date: '' };
+  }
+
+  onScanFileChange(e: any): void {
+    this.scanFile = e.target.files[0];
+  }
+
+  onAnalysisFileChange(e: any): void {
+    this.analysisFile = e.target.files[0];
+  }
+
+  onSurgeryFileChange(e: any): void {
+    this.surgeryFile = e.target.files[0];
+  }
+
+  uploadScan(): void {
+    if (!this.folderId || !this.scanFile) return;
+
+    const data = new FormData();
+    data.append('file', this.scanFile);
+    data.append('title', this.scanPayload.title);
+    data.append('description', this.scanPayload.description);
+
+    this.doctorService.uploadScan(data, this.folderId).subscribe({
+      next: () => {
+        alert("Scan ajouté.");
+        this.resetScanForm();
+        this.searchPatient();
+      },
+      error: () => alert("Erreur lors de l'ajout du scan.")
+    });
+  }
+
+  uploadAnalysis(): void {
+    if (!this.folderId || !this.analysisFile) return;
+
+    const data = new FormData();
+    data.append('file', this.analysisFile);
+    data.append('title', this.analysisPayload.title);
+    data.append('description', this.analysisPayload.description);
+
+    this.doctorService.uploadAnalysis(data, this.folderId).subscribe({
+      next: () => {
+        alert("Analyse ajoutée.");
+        this.resetAnalysisForm();
+        this.searchPatient();
+      },
+      error: () => alert("Erreur lors de l'ajout de l'analyse.")
+    });
+  }
+
+  uploadSurgery(): void {
+    if (!this.folderId) return;
+
+    const data = new FormData();
+    data.append('title', this.surgeryPayload.title);
+    data.append('description', this.surgeryPayload.description);
+    if (this.surgeryFile) {
+      data.append('file', this.surgeryFile);
+    }
+
+    this.doctorService.uploadSurgery(data, this.folderId).subscribe({
+      next: () => {
+        alert("Chirurgie ajoutée.");
+        this.resetSurgeryForm();
+        this.searchPatient();
+      },
+      error: () => alert("Erreur lors de l'ajout de la chirurgie.")
+    });
+  }
+
+  resetScanForm(): void {
+    this.scanPayload = { title: '', description: '' };
+    this.scanFile = null;
+  }
+
+  resetAnalysisForm(): void {
+    this.analysisPayload = { title: '', description: '' };
+    this.analysisFile = null;
+  }
+
+  resetSurgeryForm(): void {
+    this.surgeryPayload = { title: '', description: '' };
+    this.surgeryFile = null;
+  }
+
+  viewScanDetails(id: number): void {
     this.router.navigate(['/dashboard/doctor/scan', id]);
   }
 
-  viewAnalysisDetails(id: number) {
+  viewAnalysisDetails(id: number): void {
     this.router.navigate(['/dashboard/doctor/analysis', id]);
   }
 
-  viewSurgeryDetails(id: number) {
+  viewSurgeryDetails(id: number): void {
     this.router.navigate(['/dashboard/doctor/surgery', id]);
   }
 
-  viewPrescriptionDetails(id: number) {
-    this.router.navigate(['/dashboard/doctor/prescription', id]);
+  viewConsultationDetails(id: number): void {
+    this.router.navigate(['/dashboard/doctor/consultation', id]);
   }
 
-  viewConsultationDetails(id: number) {
-    this.router.navigate(['/dashboard/doctor/consultation', id]);
+  viewPrescriptionDetails(id: number): void {
+    this.router.navigate(['/dashboard/doctor/prescription', id]);
   }
 }

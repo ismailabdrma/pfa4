@@ -1,34 +1,79 @@
-<div class="register-form">
-  <h2>Inscription Patient</h2>
+<div class="register-container">
+  <h2>Register as Patient</h2>
 
-  <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
     <div>
-      <label>Nom complet</label>
-      <input type="text" formControlName="fullName" placeholder="Ex: Ahmed Benali" />
+      <label for="fullName">Full Name:</label>
+      <input id="fullName" formControlName="fullName" type="text" />
+      <div *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid" class="error">
+        Full name is required.
+      </div>
     </div>
 
     <div>
-      <label>Email</label>
-      <input type="email" formControlName="email" placeholder="Ex: exemple@gmail.com" />
+      <label for="email">Email:</label>
+      <input id="email" formControlName="email" type="email" />
+      <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="error">
+        Valid email is required.
+      </div>
     </div>
 
     <div>
-      <label>Mot de passe</label>
-      <input type="password" formControlName="password" placeholder="Mot de passe sécurisé" />
+      <label for="password">Password:</label>
+      <input id="password" formControlName="password" type="password" />
+      <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="error">
+        Password must be at least 6 characters.
+      </div>
     </div>
 
     <div>
-      <label>Téléphone</label>
-      <input type="text" formControlName="phone" placeholder="Ex: 0600000000" />
+      <label for="phone">Phone:</label>
+      <input id="phone" formControlName="phone" type="text" />
     </div>
 
     <div>
-      <label>CIN</label>
-      <input type="text" formControlName="cin" placeholder="Ex: AB123456" />
+      <label for="cin">CIN:</label>
+      <input id="cin" formControlName="cin" type="text" />
     </div>
 
-    <button type="submit" [disabled]="patientForm.invalid">S'inscrire</button>
+    <div>
+      <label for="birthDate">Birth Date:</label>
+      <input id="birthDate" formControlName="birthDate" type="date" />
+    </div>
+
+    <div>
+      <label for="bloodType">Blood Type:</label>
+      <input id="bloodType" formControlName="bloodType" type="text" />
+    </div>
+
+    <div>
+      <label for="emergencyContact">Emergency Contact:</label>
+      <input id="emergencyContact" formControlName="emergencyContact" type="text" />
+    </div>
+
+    <div>
+      <label for="allergies">Allergies:</label>
+      <input id="allergies" formControlName="allergies" type="text" />
+    </div>
+
+    <div>
+      <label for="chronicDiseases">Chronic Diseases:</label>
+      <input id="chronicDiseases" formControlName="chronicDiseases" type="text" />
+    </div>
+
+    <div>
+      <label for="hasHeartProblem">Heart Problem:</label>
+      <input id="hasHeartProblem" formControlName="hasHeartProblem" type="checkbox" />
+    </div>
+
+    <div>
+      <label for="hasSurgery">Surgery:</label>
+      <input id="hasSurgery" formControlName="hasSurgery" type="checkbox" />
+    </div>
+
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+    <button type="submit" [disabled]="registerForm.invalid">Register</button>
   </form>
-
-  <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
 </div>

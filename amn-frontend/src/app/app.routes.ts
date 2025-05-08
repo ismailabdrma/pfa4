@@ -20,6 +20,11 @@ import { PatientProfileComponent } from './dashboard/doctor/patient-profile/pati
 import { UploadScanComponent } from './dashboard/doctor/upload-scan.component';
 import { ScanDetailComponent } from './dashboard/doctor/scan-detail/scan-detail.component';
 import { SurgeryDetailComponent } from './dashboard/doctor/surgery-detail/surgery-detail.component';
+import { ConsultationDetailComponent } from './dashboard/doctor/consultation-detail/consultation-detail.component';
+import { PrescriptionDetailComponent } from './dashboard/doctor/prescription-detail/prescription-detail.component';
+import {AnalysisDetailComponent} from 'src/app/dashboard/doctor/analysis-detail/analysis-detail.component';
+import { ConsultationPrescriptionComponent } from './dashboard/doctor/consultation-prescription/consultation-prescription.component';
+
 export const routes: Routes = [
   // Default
   { path: '', redirectTo: 'select-role', pathMatch: 'full' },
@@ -45,4 +50,11 @@ export const routes: Routes = [
   {path: 'dashboard/doctor/upload-scan', component: UploadScanComponent },
   { path: 'dashboard/doctor/scan/:scanId', component: ScanDetailComponent },
   { path: 'dashboard/doctor/surgery/:surgeryId', component: SurgeryDetailComponent},
+
+  { path: 'dashboard/doctor/consultation/:consultationId', component: ConsultationDetailComponent },
+  { path: 'dashboard/doctor/prescription/:prescriptionId', component: PrescriptionDetailComponent },
+  { path: 'dashboard/doctor/analysis/:analysisId', component: AnalysisDetailComponent},
+  { path: 'dashboard/doctor/consultation-prescription/:cin/:fullName', component: ConsultationPrescriptionComponent },
+  { path: 'dashboard/admin', component: AdminComponent },
+
 ];

@@ -1,16 +1,14 @@
-<div class="container mx-auto p-4">
-  <h2 class="text-2xl font-bold mb-4">Détails de la chirurgie</h2>
-  <div *ngIf="error" class="text-red-600">{{ error }}</div>
-  <div *ngIf="!surgery && !error" class="text-gray-500">Chargement...</div>
-  <div *ngIf="surgery" class="space-y-4 bg-white p-4 rounded shadow">
-    <p><strong>Type:</strong> {{ surgery.type }}</p>
+<div class="p-6 space-y-4" *ngIf="surgery">
+  <h1 class="text-2xl font-bold">Détails de la Chirurgie</h1>
+
+  <div class="bg-white rounded shadow p-4">
+    <p><strong>Titre:</strong> {{ surgery.title }}</p>
+    <p><strong>Description:</strong> {{ surgery.description }}</p>
     <p><strong>Date:</strong> {{ surgery.uploadDate }}</p>
-    <p><strong>Chirurgien:</strong> {{ surgery.surgeonName }}</p>
-    <p><strong>Hôpital:</strong> {{ surgery.hospitalName }}</p>
-    <p><strong>Complications:</strong> {{ surgery.complications }}</p>
-    <div *ngIf="surgery.url">
-      <h4 class="font-semibold">Fichier:</h4>
-      <img [src]="surgery.url" alt="Image chirurgie" class="max-w-full rounded border" />
+    <p><strong>Type de fichier:</strong> {{ surgery.fileType }}</p>
+
+    <div *ngIf="surgery.url" class="mt-4">
+      <img [src]="surgery.url" alt="Chirurgie" class="max-w-full h-auto border rounded" />
     </div>
   </div>
 </div>

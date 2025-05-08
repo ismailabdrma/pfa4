@@ -1,53 +1,61 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { PharmacistService } from 'src/app/services/pharmacist.service';
+import { PrescriptionDTO } from 'src/app/models/prescription.dto';
 
 @Component({
   selector: 'app-pharmacist',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './pharmacist.component.html'
+  templateUrl: './pharmacist.component.html',
+  styleUrls: ['./pharmacist.component.css'],
+  providers: [DatePipe],
+  imports: [CommonModule, FormsModule]
 })
-export class PharmacistComponent {
-  cin = '';
-  fullName = '';
-  prescriptions: any[] = [];
-  pharmacistId: number = 1; // for demo, replace with real value
-  patientId: number | null = null;
+export class PharmacistComponent implements OnInit {
+  prescriptions: PrescriptionDTO[] = [];
+  cin: string = '';
+  fullName: string = '';
+  errorMessage: string = '';
 
-  otcMedication = {
-    name: '',
-    size: '',
-    price: 0
-  };
+  constructor(private pharmacistService: PharmacistService) {}
 
-  constructor(private http: HttpClient) {}
+  ngOnInit(): void {
+    this.prescriptions = [];
+  }
 
-  searchPrescriptions() {
-    this.http.get<any[]>(`/api/pharmacist/prescriptions/by-patient?cin=${this.cin}&fullName=${this.fullName}`).subscribe({
-      next: (res) => {
-        this.prescriptions = res;
-        if (res.length > 0) {
-          this.patientId = res[0].patient.id;
-        }
+  /**
+   * Search for DISPENSED prescriptions by CIN and Full Name
+   */
+  searchPrescriptions(): void {
+    if (this.cin.trim() === '' || this.fullName.trim() === '') {
+      this.errorMessage = 'Veuillez entrer le CIN et le nom complet.';
+      return;
+    }
+
+    this.pharmacistService.getDispensedPrescriptions(this.cin, this.fullName).subscribe({
+      next: (data) => {
+        this.prescriptions = data;
+        this.errorMessage = '';
       },
-      error: () => alert('Erreur lors de la recherche')
+      error: () => {
+        this.prescriptions = [];
+        this.errorMessage = 'Aucune ordonnance trouvée pour ce patient.';
+      },
     });
   }
 
-  validatePrescription(prescriptionId: number) {
-    this.http.post(`/api/pharmacist/dispense?prescriptionId=${prescriptionId}&pharmacistId=${this.pharmacistId}`, {}).subscribe({
-      next: () => alert('Prescription validée'),
-      error: () => alert('Erreur lors de la validation')
-    });
-  }
-
-  addOTC() {
-    if (!this.patientId) return;
-    this.http.post(`/api/pharmacist/add-otc?pharmacistId=${this.pharmacistId}&patientId=${this.patientId}`, this.otcMedication).subscribe({
-      next: () => alert('Médicament OTC ajouté et prescription enregistrée'),
-      error: () => alert('Erreur lors de l’ajout')
+  /**
+   * Mark a prescription as DISPENSED
+   */
+  markAsDispensed(prescriptionId: number): void {
+    this.pharmacistService.markAsDispensed(prescriptionId).subscribe({
+      next: () => {
+        this.searchPrescriptions(); // Refresh the list after marking as dispensed
+      },
+      error: () => {
+        this.errorMessage = 'Erreur lors de la mise à jour de la prescription.';
+      },
     });
   }
 }

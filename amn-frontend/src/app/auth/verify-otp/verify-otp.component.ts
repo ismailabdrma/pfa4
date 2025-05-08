@@ -14,30 +14,63 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class VerifyOtpComponent {
   otpForm: FormGroup;
-  errorMessage = '';
-  email = '';
+  errorMessage: string = '';
+  email: string = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
   ) {
+    // ✅ Retrieve the pending email for OTP verification
     this.email = this.authService.getPendingEmail();
+
+    // ✅ Initialize OTP Form
     this.otpForm = this.fb.group({
-      otpCode: ['', [Validators.required, Validators.minLength(6)]]
+      otpCode: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]]
     });
   }
 
-  onSubmit() {
-    if (this.otpForm.invalid) return;
+  /**
+   * ✅ Handle OTP Submission
+   */
+  onSubmit(): void {
+    if (this.otpForm.invalid) {
+      this.errorMessage = 'Veuillez entrer un code OTP valide.';
+      return;
+    }
 
-    this.authService.verifyOtp(this.email, this.otpForm.value.otpCode).subscribe({
-      next: (res: any) => {
-        this.authService.saveToken(res.token);   // Save JWT
-        this.authService.redirectToDashboard();  // Redirect by role
+    const otpCode = this.otpForm.value.otpCode.trim();
+
+    this.authService.verifyOtp(this.email, otpCode).subscribe({
+      next: (response: any) => {
+        const { token, role } = response;
+
+        if (token && role) {
+          // ✅ Save the JWT token and redirect
+          this.authService.saveToken(token);
+          this.authService.redirectToDashboard(role);
+        } else {
+          this.errorMessage = 'Erreur: Le rôle ou le token est manquant dans la réponse.';
+        }
+      },
+      error: (err) => {
+        console.error('OTP Verification Error:', err);
+        this.errorMessage = err?.error?.message || 'Code OTP invalide ou expiré.';
+      }
+    });
+  }
+
+  /**
+   * ✅ Resend OTP (Optional - Implement Backend Logic)
+   */
+  resendOtp(): void {
+    this.authService.verifyOtp(this.email, '').subscribe({
+      next: () => {
+        alert('Le code OTP a été renvoyé à votre email.');
       },
       error: () => {
-        this.errorMessage = 'Code OTP invalide ou expiré.';
+        this.errorMessage = 'Erreur lors de l\'envoi du code OTP.';
       }
     });
   }

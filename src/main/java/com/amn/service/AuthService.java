@@ -3,6 +3,7 @@ package com.amn.service;
 import com.amn.dto.AuthResponse;
 import com.amn.dto.RegisterRequest;
 import com.amn.entity.*;
+import com.amn.entity.enums.AccountStatus;
 import com.amn.entity.enums.Role;
 import com.amn.repository.MedicalFolderRepository;
 import com.amn.repository.PatientRepository;
@@ -31,29 +32,48 @@ public class AuthService {
         User user;
 
         switch (request.getRole()) {
-            case DOCTOR -> user = Doctor.builder()
-                    .fullName(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .phone(request.getPhone())
-                    .role(DOCTOR)
-                    .build();
+            case DOCTOR -> {
+                if (request.getMatricule() == null || request.getSpecialization() == null) {
+                    throw new IllegalArgumentException("Matricule and Specialization are required for Doctors.");
+                }
 
-            case PHARMACIST -> user = Pharmacist.builder()
-                    .fullName(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .phone(request.getPhone())
-                    .role(PHARMACIST)
-                    .build();
+                user = Doctor.builder()
+                        .fullName(request.getName())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .phone(request.getPhone())
+                        .matricule(request.getMatricule())
+                        .specialty(request.getSpecialization())
+                        .status(AccountStatus.PENDING)  // Must be approved by admin
+                        .role(DOCTOR)
+                        .build();
+            }
 
-            case ADMIN -> user = Admin.builder()
-                    .fullName(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .phone(request.getPhone())
-                    .role(ADMIN)
-                    .build();
+            case PHARMACIST -> {
+                if (request.getMatricule() == null) {
+                    throw new IllegalArgumentException("Matricule is required for Pharmacists.");
+                }
+
+                user = Pharmacist.builder()
+                        .fullName(request.getName())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .phone(request.getPhone())
+                        .matricule(request.getMatricule())
+                        .status(AccountStatus.PENDING)  // Must be approved by admin
+                        .role(PHARMACIST)
+                        .build();
+            }
+
+            case ADMIN -> {
+                user = Admin.builder()
+                        .fullName(request.getName())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .phone(request.getPhone())
+                        .role(ADMIN)
+                        .build();
+            }
 
             case PATIENT -> {
                 Patient patient = Patient.builder()
@@ -65,22 +85,29 @@ public class AuthService {
                         .cin(request.getCin())
                         .birthDate(request.getBirthDate())
                         .bloodType(request.getBloodType())
+                        .chronicDiseases(request.getChronicDiseases())
+                        .allergies(request.getAllergies())
+                        .emergencyContact(request.getEmergencyContact())
+                        .hasHeartProblem(request.getHasHeartProblem())
+                        .hasSurgery(request.getHasSurgery())// Patient is directly active
                         .build();
 
-                user = patientRepository.save(patient); // enregistrer le patient
+                patient = patientRepository.save(patient);
 
-                // Créer dossier médical vide
+                // Create a new MedicalFolder for the patient
                 MedicalFolder folder = new MedicalFolder();
                 folder.setPatient(patient);
                 folder.setCreationDate(LocalDate.now());
                 folder.setDescription("Dossier médical de " + patient.getFullName());
                 medicalFolderRepository.save(folder);
+
+                user = patient;
             }
 
             default -> throw new IllegalArgumentException("Unsupported role: " + request.getRole());
         }
 
-        userRepository.save(user); // enregistrer l'utilisateur général
+        userRepository.save(user);
 
         String token = jwtService.generateToken(
                 Map.of("role", user.getRole().name()),

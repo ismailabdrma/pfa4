@@ -1,9 +1,6 @@
 package com.amn.controller;
 
-import com.amn.dto.AnalysisDTO;
-import com.amn.dto.PatientProfileDTO;
-import com.amn.dto.ScanDTO;
-import com.amn.dto.SurgeryDTO;
+import com.amn.dto.*;
 import com.amn.entity.MedicalFolder;
 import com.amn.entity.Patient;
 import com.amn.repository.*;
@@ -12,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,6 +44,11 @@ public class PatientController {
 
         var surgeryDTOs = surgeryRepository.findAllByMedicalFolderId(folder.getId())
                 .stream().map(SurgeryDTO::fromEntity).collect(Collectors.toList());
+        List<PrescriptionDTO> prescriptions = prescriptionRepository.findAllByPatientId(patient.getId())
+                .stream()
+                .map(PrescriptionDTO::fromEntity)
+                .collect(Collectors.toList());
+
 
         PatientProfileDTO profile = PatientProfileDTO.builder()
                 .fullName(patient.getFullName())
@@ -57,14 +60,19 @@ public class PatientController {
                 .chronicDiseases(patient.getChronicDiseases())
                 .hasHeartProblem(patient.isHasHeartProblem())
                 .hasSurgery(patient.isHasSurgery())
-                .medicalRecords(folder.getMedicalRecords())
+                .medicalRecords(
+                folder.getMedicalRecords().stream()
+                        .map(MedicalRecordDTO::fromEntity)
+                        .collect(Collectors.toList())
+        )
+
                 .visitLogs(folder.getVisitLogs())
                 .email(patient.getEmail())
                 .phone(patient.getPhone())
                 .analyses(analysisDTOs)
                 .scans(scanDTOs)
                 .surgeries(surgeryDTOs)
-                .prescriptions(prescriptionRepository.findAllByPatientId(patient.getId()))
+                .prescriptions(prescriptions) // Now it's List<PrescriptionDTO>
                 .vaccinations(vaccinationRepository.findAllByMedicalFolderId(folder.getId()))
                 .build();
 

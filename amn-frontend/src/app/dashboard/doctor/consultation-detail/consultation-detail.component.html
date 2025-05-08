@@ -1,0 +1,31 @@
+<div *ngIf="consultation" class="p-6">
+  <h2 class="text-2xl font-bold mb-4">Détails de la consultation</h2>
+
+  <div class="mb-4">
+    <p><strong>Date :</strong> {{ consultation.creationDate | date: 'short' }}</p>
+    <p><strong>Motif :</strong> {{ consultation.reason }}</p>
+    <p><strong>Diagnostic :</strong> {{ consultation.diagnosis }}</p>
+    <p><strong>Notes :</strong> {{ consultation.notes }}</p>
+    <p><strong>Consulté par :</strong> {{ consultation.doctorName || 'Docteur inconnu' }}</p>
+  </div>
+
+  <div *ngIf="consultation.prescription">
+    <h3 class="text-xl font-semibold mb-2">Ordonnance associée</h3>
+    <p><strong>Date de prescription :</strong> {{ consultation.prescription.prescribedDate | date: 'short' }}</p>
+    <p><strong>Permanent :</strong> {{ consultation.prescription.permanent ? 'Oui' : 'Non' }}</p>
+    <p><strong>Prescrit par :</strong> {{ consultation.prescription.prescribingDoctorName || 'Docteur inconnu' }}</p>
+
+    <div *ngIf="consultation.prescription.medications?.length">
+      <p class="mt-2 font-medium">Médicaments :</p>
+      <ul class="list-disc list-inside">
+        <li *ngFor="let med of consultation.prescription.medications">
+          {{ med.name }} - {{ med.dosage }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div *ngIf="!consultation.prescription" class="text-gray-600 mt-4">
+    Aucune ordonnance n'est liée à cette consultation.
+  </div>
+</div>

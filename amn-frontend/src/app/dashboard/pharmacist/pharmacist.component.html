@@ -1,30 +1,54 @@
-<h2>📦 Rechercher les prescriptions</h2>
-<form (submit)="searchPrescriptions()">
-  <label>CIN:</label>
-  <input [(ngModel)]="cin" name="cin" required />
+<div class="p-6 bg-gray-50 min-h-screen">
+  <h1 class="text-2xl font-bold mb-6">Tableau de bord du pharmacien</h1>
 
-  <label>Nom complet:</label>
-  <input [(ngModel)]="fullName" name="fullName" required />
+  <!-- Search Form -->
+  <div class="bg-white shadow rounded p-4 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Rechercher les ordonnances du patient</h2>
+    <div class="flex space-x-4">
+      <input [(ngModel)]="cin" placeholder="CIN" class="border p-2 flex-1" />
+      <input [(ngModel)]="fullName" placeholder="Nom complet" class="border p-2 flex-1" />
+      <button (click)="searchPrescriptions()" class="bg-blue-600 text-white px-4 py-2 rounded">Rechercher</button>
+    </div>
+    <p class="text-red-500 mt-2">{{ errorMessage }}</p>
+  </div>
 
-  <button type="submit">Rechercher</button>
-</form>
+  <!-- Prescription List -->
+  <div *ngIf="prescriptions.length > 0" class="bg-white shadow rounded p-4">
+    <h2 class="text-lg font-semibold mb-4">Ordonnances DISPENSED</h2>
+    <table class="w-full border text-sm">
+      <thead>
+      <tr class="bg-gray-100">
+        <th class="p-2">Date</th>
+        <th class="p-2">Médicaments</th>
+        <th class="p-2">Statut</th>
+        <th class="p-2">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let prescription of prescriptions" class="border-b">
+        <td class="p-2">{{ prescription.prescribedDate | date: 'short' }}</td>
+        <td class="p-2">
+          <ul>
+            <li *ngFor="let med of prescription.medications">{{ med.name }} - {{ med.dosage }}</li>
+          </ul>
+        </td>
+        <td class="p-2">{{ prescription.status }}</td>
+        <td class="p-2">
+          <button
+            *ngIf="prescription.status !== 'DISPENSED'"
+            (click)="markAsDispensed(prescription.id)"
+            class="bg-green-600 text-white px-4 py-1 rounded"
+          >
+            Délivrer
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 
-<hr />
-
-<div *ngIf="prescriptions.length > 0">
-  <h3>📝 Prescriptions trouvées</h3>
-  <ul>
-    <li *ngFor="let p of prescriptions">
-      {{ p.medicines || p.medicationName }} - {{ p.instructions || p.status }}
-      <button (click)="validatePrescription(p.id)" [disabled]="p.status === 'DISPENSED'">Valider</button>
-    </li>
-  </ul>
-
-  <h3>➕ Ajouter un Médicament OTC</h3>
-  <form (submit)="addOTC()">
-    <input [(ngModel)]="otcMedication.name" name="name" placeholder="Nom" required />
-    <input [(ngModel)]="otcMedication.size" name="size" placeholder="Dosage" required />
-    <input [(ngModel)]="otcMedication.price" name="price" type="number" placeholder="Prix" required />
-    <button type="submit">Ajouter</button>
-  </form>
+  <!-- No Prescriptions Found -->
+  <div *ngIf="prescriptions.length === 0 && !errorMessage" class="bg-white shadow rounded p-4 mt-6">
+    <p class="text-gray-600">Aucune ordonnance DISPENSED trouvée pour ce patient.</p>
+  </div>
 </div>

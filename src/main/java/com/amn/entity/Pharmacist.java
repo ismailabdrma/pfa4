@@ -2,6 +2,7 @@ package com.amn.entity;
 
 import com.amn.entity.enums.AccountStatus;
 import com.amn.entity.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -27,6 +28,7 @@ public class Pharmacist extends User {
 
     // Relationship with Prescription (pharmacist dispenses prescriptions)
     @OneToMany(mappedBy = "dispensingPharmacist", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Prescription> dispensedPrescriptions;
 
 

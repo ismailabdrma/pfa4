@@ -2,15 +2,28 @@ package com.amn.dto;
 
 import com.amn.entity.enums.Role;
 import lombok.Data;
+
+
 import java.time.LocalDate;
 
 @Data
 public class RegisterRequest {
+
+    // Common Fields
+
     private String name;
+
+
     private String email;
+
+
     private String password;
+
+
     private String phone;
-    private Role role; // Fixed: was 'S' instead of 'String'
+
+
+    private Role role;
 
     // PATIENT-specific fields
     private String cin;
@@ -19,14 +32,12 @@ public class RegisterRequest {
     private String chronicDiseases;
     private String allergies;
     private String emergencyContact;
-    private Boolean hasHeartProblem;
-    private Boolean hasSurgery;
+    private Boolean hasHeartProblem = false;
+    private Boolean hasSurgery = false;
+
+    // DOCTOR & PHARMACIST - Common Fields
     private String matricule;
 
-
-
-
-    // DOCTOR-specific (optional)
+    // DOCTOR-specific field
     private String specialization;
 }
-

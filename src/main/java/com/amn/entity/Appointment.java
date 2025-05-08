@@ -1,5 +1,6 @@
 package com.amn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,5 +22,6 @@ public class Appointment {
     private String description;
 
     @ManyToOne
+    @JsonIgnore
     private MedicalFolder medicalFolder;
 }

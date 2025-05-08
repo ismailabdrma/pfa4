@@ -32,11 +32,14 @@ public class Patient extends User {
 
     @ManyToOne
     @JoinColumn(name = "admin_id")
+    @JsonIgnore
     private Admin managedBy;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Medication> medications;
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+
     private List<OTP> otps;
 
 }

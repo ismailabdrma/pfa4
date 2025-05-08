@@ -1,17 +1,24 @@
 package com.amn.dto;
 
-import com.amn.entity.enums.MedicationType;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import com.amn.entity.Medication;
+import lombok.*;
 
 @Data
-@Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MedicationDTO {
-    private Long id;
     private String name;
-    private String size;
-    private double price; // Optional: only filled for pharmacists
-    private MedicationType type;
+    private String dosage;
+    private String instructions;
+    private double price;
+
+    public static MedicationDTO fromEntity(Medication med) {
+        return MedicationDTO.builder()
+                .name(med.getName())
+                .dosage(med.getDosage())
+                .instructions(med.getInstructions())
+                .price(med.getPrice())
+                .build();
+    }
 }

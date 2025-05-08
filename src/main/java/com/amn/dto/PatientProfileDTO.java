@@ -30,11 +30,15 @@ public class PatientProfileDTO {
     private Long medicalFolderId;
 
     // Use raw entity lists — NO DTOs
-    private List<MedicalRecord> medicalRecords;
+    private List<MedicalRecordDTO> medicalRecords;
+
     private List<Vaccination> vaccinations;
     private List<VisitLog> visitLogs;
     private List<ScanDTO> scans;
     private List<SurgeryDTO> surgeries;
-    private List<Prescription> prescriptions;
+    private List<PrescriptionDTO> prescriptions;
+    // ✅ Fix here
+
+
     private List<AnalysisDTO> analyses;
 }

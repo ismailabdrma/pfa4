@@ -1,6 +1,7 @@
 package com.amn.entity;
 
 import com.amn.entity.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,14 +16,17 @@ import java.util.Set;
 public class Admin extends User {
 
     // Relationship with Patient (1:many)
+    @JsonIgnore
     @OneToMany(mappedBy = "managedBy", cascade = CascadeType.ALL)
     private Set<Patient> managedPatients;
 
     // Relationships with Doctor (1:many)
+    @JsonIgnore
     @OneToMany(mappedBy = "approvedBy", cascade = CascadeType.ALL)
     private Set<Doctor> approvedDoctors;
 
     // Relationships with Pharmacist (1:many)
+    @JsonIgnore
     @OneToMany(mappedBy = "approvedBy", cascade = CascadeType.ALL)
     private Set<Pharmacist> approvedPharmacists;
 
