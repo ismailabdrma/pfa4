@@ -173,6 +173,27 @@ public class DoctorController {
         }
         return ResponseEntity.ok(new DoctorDTO(doctor));
     }
+    /**
+     * ✅ Add a new vaccination record
+     */
+    @PostMapping("/add-vaccination")
+    public ResponseEntity<Vaccination> addVaccination(
+            @RequestParam Long folderId,
+            @RequestParam String vaccineName,
+            @RequestParam int doseNumber,
+            @RequestParam String manufacturer,
+            @RequestParam String date
+    ) {
+        LocalDate vaccinationDate = LocalDate.parse(date);
+        Vaccination vaccination = doctorService.addVaccinationRecord(
+                folderId,
+                vaccineName,
+                doseNumber,
+                manufacturer,
+                vaccinationDate
+        );
+        return ResponseEntity.ok(vaccination);
+    }
 
 
 

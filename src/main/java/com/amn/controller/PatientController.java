@@ -130,12 +130,13 @@ public class PatientController {
     /**
      * ✅ Update Patient Basic Info (Address, Email, Phone)
      */
-    @PutMapping("/update-basic-info")
-    public ResponseEntity<String> updatePatientBasicInfo(@RequestParam String cin, @RequestBody PatientBasicInfoDTO basicInfo) {
+    @PutMapping("/basic-info/{cin}")
+    public ResponseEntity<String> updatePatientBasicInfo(@PathVariable String cin, @RequestBody PatientBasicInfoDTO basicInfo) {
         System.out.println("Updating patient basic info for CIN: " + cin);
         patientService.updatePatientBasicInfo(cin, basicInfo);
         return ResponseEntity.ok("Patient information updated successfully.");
     }
+
 
 
 }

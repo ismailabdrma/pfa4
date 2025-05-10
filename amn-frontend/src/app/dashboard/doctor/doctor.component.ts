@@ -59,6 +59,9 @@ export class DoctorComponent implements OnInit {
   analysisFile: File | null = null;
   surgeryFile: File | null = null;
 
+  // Active tab for medical documents
+  activeDocTab: string = 'scans';
+
   constructor(private doctorService: DoctorService, private router: Router) {}
 
   ngOnInit(): void {
@@ -75,7 +78,6 @@ export class DoctorComponent implements OnInit {
       }
     });
   }
-
 
   searchPatient(): void {
     this.doctorService.getFullPatientProfile(this.cin, this.fullName).subscribe({
@@ -134,7 +136,15 @@ export class DoctorComponent implements OnInit {
   }
 
   uploadScan(): void {
-    if (!this.folderId || !this.scanFile) return;
+    if (!this.folderId || !this.scanFile) {
+      alert('Veuillez sélectionner un fichier et remplir tous les champs.');
+      return;
+    }
+
+    if (!this.scanPayload.title.trim()) {
+      alert('Le titre est obligatoire.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', this.scanFile);
@@ -143,18 +153,28 @@ export class DoctorComponent implements OnInit {
 
     this.doctorService.uploadScan(formData, this.folderId).subscribe({
       next: () => {
-        alert('Scan ajouté.');
+        alert('Scan ajouté avec succès.');
         this.resetScanForm();
         this.searchPatient(); // Refresh data
+        this.setActiveDocTab('scans'); // Switch to scans tab to show the newly added scan
       },
-      error: () => {
-        console.error('Erreur lors de l\'ajout du scan.');
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout du scan:', err);
+        alert('Erreur lors de l\'ajout du scan. Veuillez réessayer.');
       }
     });
   }
 
   uploadAnalysis(): void {
-    if (!this.folderId || !this.analysisFile) return;
+    if (!this.folderId || !this.analysisFile) {
+      alert('Veuillez sélectionner un fichier et remplir tous les champs.');
+      return;
+    }
+
+    if (!this.analysisPayload.title.trim()) {
+      alert('Le titre est obligatoire.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', this.analysisFile);
@@ -163,18 +183,28 @@ export class DoctorComponent implements OnInit {
 
     this.doctorService.uploadAnalysis(formData, this.folderId).subscribe({
       next: () => {
-        alert('Analyse ajoutée.');
+        alert('Analyse ajoutée avec succès.');
         this.resetAnalysisForm();
         this.searchPatient(); // Refresh data
+        this.setActiveDocTab('analyses'); // Switch to analyses tab to show the newly added analysis
       },
-      error: () => {
-        console.error('Erreur lors de l\'ajout de l\'analyse.');
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout de l\'analyse:', err);
+        alert('Erreur lors de l\'ajout de l\'analyse. Veuillez réessayer.');
       }
     });
   }
 
   uploadSurgery(): void {
-    if (!this.folderId || !this.surgeryFile) return;
+    if (!this.folderId || !this.surgeryFile) {
+      alert('Veuillez sélectionner un fichier et remplir tous les champs.');
+      return;
+    }
+
+    if (!this.surgeryPayload.title.trim()) {
+      alert('Le titre est obligatoire.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', this.surgeryFile);
@@ -183,12 +213,14 @@ export class DoctorComponent implements OnInit {
 
     this.doctorService.uploadSurgery(formData, this.folderId).subscribe({
       next: () => {
-        alert('Chirurgie ajoutée.');
+        alert('Chirurgie ajoutée avec succès.');
         this.resetSurgeryForm();
         this.searchPatient(); // Refresh data
+        this.setActiveDocTab('surgeries'); // Switch to surgeries tab to show the newly added surgery
       },
-      error: () => {
-        console.error('Erreur lors de l\'ajout de la chirurgie.');
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout de la chirurgie:', err);
+        alert('Erreur lors de l\'ajout de la chirurgie. Veuillez réessayer.');
       }
     });
   }
@@ -196,21 +228,79 @@ export class DoctorComponent implements OnInit {
   resetScanForm(): void {
     this.scanPayload = { title: '', description: '' };
     this.scanFile = null;
+    // Reset file input
+    const fileInput = document.getElementById('scanFileInput') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 
   resetAnalysisForm(): void {
     this.analysisPayload = { title: '', description: '' };
     this.analysisFile = null;
+    // Reset file input
+    const fileInput = document.getElementById('analysisFileInput') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 
   resetSurgeryForm(): void {
     this.surgeryPayload = { title: '', description: '' };
     this.surgeryFile = null;
+    // Reset file input
+    const fileInput = document.getElementById('surgeryFileInput') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 
-  // Vaccination methods
+  // Method to set active tab
+  setActiveDocTab(tabId: string): void {
+    this.activeDocTab = tabId;
+
+    // This is a workaround for programmatic tab activation if not using Bootstrap JS
+    // First, remove active class from all tabs
+    document.querySelectorAll('.nav-link').forEach(el => {
+      el.classList.remove('active');
+      el.setAttribute('aria-selected', 'false');
+    });
+
+    // Then add active class to the selected tab
+    const selectedTab = document.getElementById(`${tabId}-tab`);
+    if (selectedTab) {
+      selectedTab.classList.add('active');
+      selectedTab.setAttribute('aria-selected', 'true');
+    }
+
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(el => {
+      el.classList.remove('show', 'active');
+    });
+
+    // Show the selected tab pane
+    const selectedPane = document.getElementById(tabId);
+    if (selectedPane) {
+      selectedPane.classList.add('show', 'active');
+    }
+  }
+
+  // Vaccination methods with enhanced validation
   addVaccination(): void {
-    if (!this.folderId) return;
+    if (!this.folderId) {
+      alert("Veuillez d'abord sélectionner un patient.");
+      return;
+    }
+
+    // Basic validation
+    if (!this.vaccination.vaccineName.trim()) {
+      alert("Le nom du vaccin est obligatoire.");
+      return;
+    }
+
+    if (!this.vaccination.manufacturer.trim()) {
+      alert("Le fabricant est obligatoire.");
+      return;
+    }
+
+    if (!this.vaccination.date) {
+      alert("La date de vaccination est obligatoire.");
+      return;
+    }
 
     this.doctorService.addVaccination(
       this.folderId,
@@ -220,7 +310,7 @@ export class DoctorComponent implements OnInit {
       this.vaccination.date
     ).subscribe({
       next: () => {
-        alert('Vaccination ajoutée.');
+        alert('Vaccination ajoutée avec succès.');
         this.vaccination = {
           vaccineName: '',
           doseNumber: 1,
@@ -228,9 +318,11 @@ export class DoctorComponent implements OnInit {
           date: ''
         };
         this.searchPatient(); // Refresh data
+        this.setActiveDocTab('vaccinations'); // Switch to vaccinations tab to show the newly added vaccination
       },
-      error: () => {
-        console.error('Erreur lors de l\'ajout de la vaccination.');
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout de la vaccination:', err);
+        alert('Erreur lors de l\'ajout de la vaccination. Veuillez vérifier les données et réessayer.');
       }
     });
   }
@@ -238,6 +330,11 @@ export class DoctorComponent implements OnInit {
   // Consultation and prescription methods
   createConsultation(): void {
     if (!this.patientId) return;
+
+    if (!this.consultation.reason.trim()) {
+      alert("Le motif de consultation est obligatoire.");
+      return;
+    }
 
     const consultationData = {
       reason: this.consultation.reason,
@@ -250,8 +347,9 @@ export class DoctorComponent implements OnInit {
         alert('Consultation créée avec succès.');
         this.searchPatient(); // Refresh data
       },
-      error: () => {
-        console.error('Erreur lors de la création de la consultation.');
+      error: (err) => {
+        console.error('Erreur lors de la création de la consultation:', err);
+        alert('Erreur lors de la création de la consultation. Veuillez réessayer.');
       }
     });
   }
@@ -269,7 +367,26 @@ export class DoctorComponent implements OnInit {
   }
 
   submitPrescription(): void {
-    if (!this.patientId || !this.patientProfile?.medicalRecords?.length) return;
+    if (!this.patientId || !this.patientProfile?.medicalRecords?.length) {
+      alert("Veuillez créer une consultation avant d'ajouter une ordonnance.");
+      return;
+    }
+
+    // Validate medications
+    if (this.medications.length === 0) {
+      alert("Veuillez ajouter au moins un médicament à l'ordonnance.");
+      return;
+    }
+
+    // Check if all medications have required fields
+    const invalidMeds = this.medications.some(med =>
+      !med.name.trim() || !med.dosage.trim() || !med.period.trim()
+    );
+
+    if (invalidMeds) {
+      alert("Veuillez remplir tous les champs pour chaque médicament.");
+      return;
+    }
 
     // Get the latest medical record ID
     const latestRecordId = this.patientProfile.medicalRecords[this.patientProfile.medicalRecords.length - 1].id;
@@ -294,8 +411,9 @@ export class DoctorComponent implements OnInit {
         };
         this.searchPatient(); // Refresh data
       },
-      error: () => {
-        console.error('Erreur lors de la création de l\'ordonnance.');
+      error: (err) => {
+        console.error('Erreur lors de la création de l\'ordonnance:', err);
+        alert('Erreur lors de la création de l\'ordonnance. Veuillez réessayer.');
       }
     });
   }
@@ -319,5 +437,15 @@ export class DoctorComponent implements OnInit {
 
   viewPrescriptionDetails(prescriptionId: number): void {
     this.router.navigate(['/dashboard/doctor/prescription', prescriptionId]);
+  }
+
+  // Method to open a file in a new tab
+  openFile(fileUrl: string): void {
+    if (fileUrl) {
+      const fullUrl = 'http://localhost:8080' + fileUrl;
+      window.open(fullUrl, '_blank');
+    } else {
+      alert('Lien du fichier invalide ou manquant.');
+    }
   }
 }

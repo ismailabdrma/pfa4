@@ -29,35 +29,54 @@ public class PatientService {
     /**
      * ✅ Get Patient Profile by CIN
      */
+    @Transactional(readOnly = true)
     public PatientProfileDTO getPatientProfileByCin(String cin) {
+        // Get just the basic patient data first
         Patient patient = patientRepository.findByCin(cin)
                 .orElseThrow(() -> new RuntimeException("Patient not found for CIN: " + cin));
 
-        return buildPatientProfile(patient);
+        return buildPatientProfileFixed(patient);
     }
 
     /**
      * ✅ Get Patient Profile by Folder ID
      */
+    @Transactional(readOnly = true)
     public PatientProfileDTO getPatientProfileByFolderId(Long folderId) {
+        // Get just the folder first
         MedicalFolder folder = medicalFolderRepository.findById(folderId)
                 .orElseThrow(() -> new RuntimeException("Medical Folder not found for ID: " + folderId));
 
-        Patient patient = folder.getPatient();
-        if (patient == null) {
-            throw new RuntimeException("No patient associated with folder ID: " + folderId);
-        }
+        // Then get the patient separately
+        Patient patient = patientRepository.findById(folder.getPatient().getId())
+                .orElseThrow(() -> new RuntimeException("No patient associated with folder ID: " + folderId));
 
-        return buildPatientProfile(patient);
+        return buildPatientProfileFixed(patient);
     }
 
     /**
-     * ✅ Build Patient Profile DTO
+     * ✅ Get Patient by Email
      */
-    private PatientProfileDTO buildPatientProfile(Patient patient) {
-        Optional<MedicalFolder> optionalFolder = medicalFolderRepository.findByPatientId(patient.getId());
-        Long folderId = optionalFolder.map(MedicalFolder::getId).orElse(null);
+    @Transactional(readOnly = true)
+    public Patient getCurrentPatient(String email) {
+        return patientRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Patient not found with email: " + email));
+    }
 
+    /**
+     * ✅ Fetch Patient Profile by Email
+     */
+    @Transactional(readOnly = true)
+    public PatientProfileDTO getPatientProfileByEmail(String email) {
+        Patient patient = getCurrentPatient(email);
+        return buildPatientProfileFixed(patient);
+    }
+
+    /**
+     * ✅ FIXED: Build Patient Profile DTO to avoid MultipleBagFetchException
+     */
+    private PatientProfileDTO buildPatientProfileFixed(Patient patient) {
+        // Start by building the basic profile without any collections
         PatientProfileDTO profile = PatientProfileDTO.builder()
                 .id(patient.getId())
                 .fullName(patient.getFullName())
@@ -72,17 +91,25 @@ public class PatientService {
                 .email(patient.getEmail())
                 .phone(patient.getPhone())
                 .address(patient.getAddress())
-                .medicalFolderId(folderId)
                 .build();
 
-        if (folderId != null) {
-            profile.setMedicalRecords(getMedicalRecords(folderId));
-            profile.setPrescriptions(getPrescriptions(folderId));
-            profile.setScans(getScans(folderId));
-            profile.setAnalyses(getAnalyses(folderId));
-            profile.setSurgeries(getSurgeries(folderId));
-            profile.setVaccinations(getVaccinations(folderId));
+        // Get folder ID in a separate query
+        Optional<MedicalFolder> folderOpt = medicalFolderRepository.findByPatientId(patient.getId());
+        if (!folderOpt.isPresent()) {
+            return profile; // Return just the basic profile if no folder exists
         }
+
+        Long folderId = folderOpt.get().getId();
+        profile.setMedicalFolderId(folderId);
+
+        // Load each collection with separate transactions to avoid MultipleBagFetchException
+        // This works because each method issues its own separate SQL query
+        profile.setMedicalRecords(getMedicalRecords(folderId));
+        profile.setPrescriptions(getPrescriptions(folderId));
+        profile.setScans(getScans(folderId));
+        profile.setAnalyses(getAnalyses(folderId));
+        profile.setSurgeries(getSurgeries(folderId));
+        profile.setVaccinations(getVaccinations(folderId));
 
         return profile;
     }
@@ -90,6 +117,7 @@ public class PatientService {
     /**
      * ✅ Fetch Medical Records by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<MedicalRecordDTO> getMedicalRecords(Long folderId) {
         return medicalRecordRepository.findByMedicalFolderId(folderId).stream()
                 .map(MedicalRecordDTO::fromEntity)
@@ -99,6 +127,7 @@ public class PatientService {
     /**
      * ✅ Fetch Prescriptions by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<PrescriptionDTO> getPrescriptions(Long folderId) {
         return prescriptionRepository.findByMedicalFolderId(folderId).stream()
                 .map(PrescriptionDTO::fromEntity)
@@ -108,6 +137,7 @@ public class PatientService {
     /**
      * ✅ Fetch Scans by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<ScanDTO> getScans(Long folderId) {
         return scanRepository.findByMedicalFolderId(folderId).stream()
                 .map(ScanDTO::fromEntity)
@@ -117,6 +147,7 @@ public class PatientService {
     /**
      * ✅ Fetch Analyses by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<AnalysisDTO> getAnalyses(Long folderId) {
         return analysisRepository.findByMedicalFolderId(folderId).stream()
                 .map(AnalysisDTO::fromEntity)
@@ -126,6 +157,7 @@ public class PatientService {
     /**
      * ✅ Fetch Surgeries by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<SurgeryDTO> getSurgeries(Long folderId) {
         return surgeryRepository.findByMedicalFolderId(folderId).stream()
                 .map(SurgeryDTO::fromEntity)
@@ -135,46 +167,48 @@ public class PatientService {
     /**
      * ✅ Fetch Vaccinations by Folder ID
      */
+    @Transactional(readOnly = true)
     public List<Vaccination> getVaccinations(Long folderId) {
         return vaccinationRepository.findByMedicalFolderId(folderId);
     }
 
     /**
-     * ✅ Get Patient by Email
+     * ✅ Get Patient Basic Info
      */
-    public Patient getCurrentPatient(String email) {
-        return patientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Patient not found with email: " + email));
-    }
-
-    /**
-     * ✅ Fetch Patient Profile by Email
-     */
-    public PatientProfileDTO getPatientProfileByEmail(String email) {
-        Patient patient = getCurrentPatient(email);
-        return buildPatientProfile(patient);
-    }
+    @Transactional(readOnly = true)
     public PatientBasicInfoDTO getPatientBasicInfo(String cin) {
         return patientRepository.findPatientBasicInfoByCin(cin);
     }
+
     /**
-     * ✅ Update Patient Basic Info (Address, Email, Phone)
+     * ✅ FIXED: Update Patient Basic Info (Address, Email, Phone)
      */
     @Transactional
     public void updatePatientBasicInfo(String cin, PatientBasicInfoDTO basicInfo) {
+        // Use JPQL to get only the patient entity without collections
         Patient patient = patientRepository.findByCin(cin)
                 .orElseThrow(() -> new RuntimeException("Patient not found for CIN: " + cin));
 
-        // Get the User instance linked to this patient
+        // Get User separately without collections
         User user = userRepository.findById(patient.getId())
                 .orElseThrow(() -> new RuntimeException("User not found for Patient ID: " + patient.getId()));
 
+        // Update Address
         if (basicInfo.getAddress() != null) {
             user.setAddress(basicInfo.getAddress());
         }
+
+        // Update Email
         if (basicInfo.getEmail() != null) {
+            // Check if email exists but make sure we're not checking against the same user
+            boolean emailExists = userRepository.existsByEmail(basicInfo.getEmail());
+            if (emailExists && !basicInfo.getEmail().equals(user.getEmail())) {
+                throw new RuntimeException("Email is already in use.");
+            }
             user.setEmail(basicInfo.getEmail());
         }
+
+        // Update Phone
         if (basicInfo.getPhone() != null) {
             user.setPhone(basicInfo.getPhone());
         }
@@ -182,26 +216,4 @@ public class PatientService {
         // Save the User entity
         userRepository.save(user);
     }
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

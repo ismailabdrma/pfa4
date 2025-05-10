@@ -16,28 +16,31 @@ public class PharmacistController {
     private final PharmacistService pharmacistService;
 
     /**
-     * ✅ Get prescriptions for a patient by CIN and Full Name.
-     * Optional query parameter `status` can be `ALL` or `DISPENSED`.
+     * ✅ Get prescriptions by CIN and Full Name with status filter
      */
     @GetMapping("/prescriptions")
-    public ResponseEntity<List<PrescriptionDTO>> getPrescriptionsByPatient(
+    public ResponseEntity<List<PrescriptionDTO>> getPrescriptions(
             @RequestParam String cin,
             @RequestParam String fullName,
             @RequestParam(defaultValue = "ALL") String status) {
 
-        List<PrescriptionDTO> prescriptions;
+        System.out.println("Fetching prescriptions with status: " + status);
 
-        if ("ALL".equalsIgnoreCase(status)) {
+        List<PrescriptionDTO> prescriptions;
+        if ("DISPENSED".equals(status)) {
             prescriptions = pharmacistService.getDispensedPrescriptionsByCinAndName(cin, fullName);
+        } else if ("PENDING".equals(status)) {
+            prescriptions = pharmacistService.getPendingPrescriptionsByCinAndName(cin, fullName);
         } else {
             prescriptions = pharmacistService.getPrescriptionsByCinAndName(cin, fullName);
         }
 
+        System.out.println("Found " + prescriptions.size() + " prescriptions");
         return ResponseEntity.ok(prescriptions);
     }
 
     /**
-     * ✅ Mark a prescription as DISPENSED
+     * ✅ Mark a prescription as dispensed
      */
     @PutMapping("/prescriptions/{id}/dispense")
     public ResponseEntity<PrescriptionDTO> markAsDispensed(@PathVariable Long id) {
@@ -46,7 +49,7 @@ public class PharmacistController {
     }
 
     /**
-     * ✅ Get a single prescription by ID
+     * ✅ Get a specific prescription by ID
      */
     @GetMapping("/prescriptions/{id}")
     public ResponseEntity<PrescriptionDTO> getPrescriptionById(@PathVariable Long id) {

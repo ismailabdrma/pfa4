@@ -1,65 +1,294 @@
-<div class="container mx-auto p-4 bg-white shadow rounded-lg">
-  <h2 class="text-2xl font-semibold mb-4">Patient Profile</h2>
-
-  <div *ngIf="isLoading" class="text-center py-4">
-    <p>Loading...</p>
+<div class="container-fluid p-4">
+  <!-- Loading, Error and Success Messages -->
+  <div *ngIf="isLoading" class="alert alert-info" role="alert">
+    <i class="fas fa-spinner fa-spin me-2"></i> Loading patient information...
   </div>
 
-  <div *ngIf="errorMessage" class="text-red-500 py-2">
-    <p>{{ errorMessage }}</p>
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i> {{ errorMessage }}
   </div>
 
-  <div *ngIf="successMessage" class="text-green-500 py-2">
-    <p>{{ successMessage }}</p>
+  <div *ngIf="successMessage" class="alert alert-success" role="alert">
+    <i class="fas fa-check-circle me-2"></i> {{ successMessage }}
   </div>
 
-  <div *ngIf="patientBasicInfo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-gray-100 p-4 rounded-lg shadow">
-      <h3 class="text-lg font-semibold">Personal Information</h3>
-      <p><strong>Full Name:</strong> {{ patientBasicInfo.fullName }}</p>
-      <p><strong>CIN:</strong> {{ patientBasicInfo.cin }}</p>
-      <p><strong>Blood Type:</strong> {{ patientBasicInfo.bloodType }}</p>
-      <p><strong>email:</strong> {{ patientBasicInfo.email }}</p>
-      <p><strong>address:</strong> {{ patientBasicInfo.address }}</p>
-      <p><strong>phone number:</strong> {{ patientBasicInfo.phone }}</p>
+  <!-- Basic Patient Info Section -->
+  <div class="row mb-4" *ngIf="patientBasicInfo">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Patient Information</h4>
 
+          <!-- Edit/Save Button -->
+          <div>
+            <button *ngIf="!isEditMode" class="btn btn-sm btn-light" (click)="enableEditMode()">
+              <i class="fas fa-edit me-1"></i> Edit
+            </button>
+            <div *ngIf="isEditMode" class="btn-group">
+              <button class="btn btn-sm btn-success" (click)="updateBasicInfo()">
+                <i class="fas fa-save me-1"></i> Save
+              </button>
+              <button class="btn btn-sm btn-light" (click)="cancelEdit()">
+                <i class="fas fa-times me-1"></i> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="row">
+            <!-- Personal Details -->
+            <div class="col-md-6">
+              <h5 class="border-bottom pb-2 mb-3">Personal Details</h5>
+
+              <div class="row mb-2">
+                <div class="col-md-4 fw-bold">Full Name:</div>
+                <div class="col-md-8">{{ patientBasicInfo.fullName }}</div>
+              </div>
+
+              <div class="row mb-2">
+                <div class="col-md-4 fw-bold">CIN:</div>
+                <div class="col-md-8">{{ patientBasicInfo.cin }}</div>
+              </div>
+
+              <div class="row mb-2">
+                <div class="col-md-4 fw-bold">Blood Type:</div>
+                <div class="col-md-8">{{ patientBasicInfo.bloodType || 'Not specified' }}</div>
+              </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-md-6">
+              <h5 class="border-bottom pb-2 mb-3">Contact Information</h5>
+
+              <!-- View Mode -->
+              <div *ngIf="!isEditMode">
+                <div class="row mb-2">
+                  <div class="col-md-4 fw-bold">Email:</div>
+                  <div class="col-md-8">{{ patientBasicInfo.email }}</div>
+                </div>
+
+                <div class="row mb-2">
+                  <div class="col-md-4 fw-bold">Phone:</div>
+                  <div class="col-md-8">{{ patientBasicInfo.phone || 'Not specified' }}</div>
+                </div>
+
+                <div class="row mb-2">
+                  <div class="col-md-4 fw-bold">Address:</div>
+                  <div class="col-md-8">{{ patientBasicInfo.address || 'Not specified' }}</div>
+                </div>
+              </div>
+
+              <!-- Edit Mode -->
+              <div *ngIf="isEditMode && editableInfo">
+                <div class="mb-3">
+                  <label for="emailInput" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="emailInput" [(ngModel)]="editableInfo.email">
+                </div>
+
+                <div class="mb-3">
+                  <label for="phoneInput" class="form-label">Phone</label>
+                  <input type="text" class="form-control" id="phoneInput" [(ngModel)]="editableInfo.phone">
+                </div>
+
+                <div class="mb-3">
+                  <label for="addressInput" class="form-label">Address</label>
+                  <input type="text" class="form-control" id="addressInput" [(ngModel)]="editableInfo.address">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Patient Profile Section (Only shown when patientProfile is loaded) -->
+  <div *ngIf="patientProfile" class="row">
+    <!-- Medical History -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-info text-white">
+          <h4 class="mb-0">Medical History</h4>
+        </div>
+
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+          <div *ngIf="!patientProfile.medicalRecords || patientProfile.medicalRecords.length === 0" class="text-center py-4">
+            <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No medical records found.</p>
+          </div>
+
+          <div *ngFor="let record of patientProfile.medicalRecords" class="mb-3 pb-3 border-bottom">
+            <div class="d-flex justify-content-between mb-2">
+              <h5 class="text-primary mb-0">{{ record.reason }}</h5>
+              <small class="text-muted">{{ formatDate(record.creationDate) }}</small>
+            </div>
+
+            <div class="mb-2">
+              <span class="fw-bold">Diagnosis:</span> {{ record.diagnosis || 'Not specified' }}
+            </div>
+
+            <div *ngIf="record.notes" class="mb-2">
+              <span class="fw-bold">Notes:</span> {{ record.notes }}
+            </div>
+
+            <div class="mb-2">
+              <span class="fw-bold">Doctor:</span> {{ record.doctorName }}
+            </div>
+
+            <!-- Prescriptions -->
+            <div *ngIf="record.prescriptions && record.prescriptions.length > 0" class="mt-2">
+              <h6 class="text-secondary">Prescriptions</h6>
+
+              <div *ngFor="let prescription of record.prescriptions" class="bg-light p-2 rounded mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                  <small class="fw-bold">Date: {{ formatDate(prescription.prescribedDate) }}</small>
+                  <small>By: {{ prescription.prescribingDoctor }}</small>
+                </div>
+
+                <ul class="list-unstyled mb-0 ps-2">
+                  <li *ngFor="let med of prescription.medications" class="small">
+                    <i class="fas fa-pills me-1 text-primary"></i> {{ med.name }} - {{ med.dosage }} ({{ med.period }})
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-gray-100 p-4 rounded-lg shadow">
-      <h3 class="text-lg font-semibold mb-2">Update Information</h3>
-
-      <form (submit)="updateBasicInfo()">
-        <div class="mb-3">
-          <label class="block font-medium mb-1">Email</label>
-          <input
-            type="email"
-            [(ngModel)]="patientBasicInfo.email"
-            class="w-full p-2 border border-gray-300 rounded"
-          />
+    <!-- Medical Files -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-secondary text-white">
+          <h4 class="mb-0">Medical Files</h4>
         </div>
 
-        <div class="mb-3">
-          <label class="block font-medium mb-1">Phone</label>
-          <input
-            type="text"
-            [(ngModel)]="patientBasicInfo.phone"
-            class="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
+        <div class="card-body">
+          <!-- Tabs for different document types -->
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeDocTab === 'scans'" (click)="setActiveDocTab('scans')">
+                Scans ({{ getItemCount(patientProfile.scans) }})
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeDocTab === 'analyses'" (click)="setActiveDocTab('analyses')">
+                Analyses ({{ getItemCount(patientProfile.analyses) }})
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeDocTab === 'surgeries'" (click)="setActiveDocTab('surgeries')">
+                Surgeries ({{ getItemCount(patientProfile.surgeries) }})
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeDocTab === 'vaccinations'" (click)="setActiveDocTab('vaccinations')">
+                Vaccinations ({{ getItemCount(patientProfile.vaccinations) }})
+              </a>
+            </li>
+          </ul>
 
-        <div class="mb-3">
-          <label class="block font-medium mb-1">Address</label>
-          <input
-            type="text"
-            [(ngModel)]="patientBasicInfo.address"
-            class="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
+          <!-- Tab content -->
+          <div style="max-height: 300px; overflow-y: auto;">
+            <!-- Scans -->
+            <div *ngIf="activeDocTab === 'scans'">
+              <div *ngIf="!patientProfile.scans || patientProfile.scans.length === 0" class="text-center py-4">
+                <i class="fas fa-x-ray fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No scan records found.</p>
+              </div>
 
-        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded mt-2 hover:bg-blue-600">
-          Update Information
-        </button>
-      </form>
+              <div *ngFor="let scan of patientProfile.scans" class="border rounded mb-3">
+                <div class="bg-light p-2 border-bottom d-flex justify-content-between">
+                  <h6 class="mb-0">{{ scan.title }}</h6>
+                  <small class="text-muted">{{ formatDate(scan.uploadDate) }}</small>
+                </div>
+                <div class="p-2">
+                  <p *ngIf="scan.description" class="small mb-2">{{ scan.description }}</p>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewFile(scan.url)">
+                    <i class="fas fa-file-medical me-1"></i> View Scan
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analyses -->
+            <div *ngIf="activeDocTab === 'analyses'">
+              <div *ngIf="!patientProfile.analyses || patientProfile.analyses.length === 0" class="text-center py-4">
+                <i class="fas fa-vials fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No analysis records found.</p>
+              </div>
+
+              <div *ngFor="let analysis of patientProfile.analyses" class="border rounded mb-3">
+                <div class="bg-light p-2 border-bottom d-flex justify-content-between">
+                  <h6 class="mb-0">{{ analysis.title }}</h6>
+                  <small class="text-muted">{{ formatDate(analysis.uploadDate) }}</small>
+                </div>
+                <div class="p-2">
+                  <p *ngIf="analysis.description" class="small mb-2">{{ analysis.description }}</p>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewFile(analysis.url)">
+                    <i class="fas fa-file-alt me-1"></i> View Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Surgeries -->
+            <div *ngIf="activeDocTab === 'surgeries'">
+              <div *ngIf="!patientProfile.surgeries || patientProfile.surgeries.length === 0" class="text-center py-4">
+                <i class="fas fa-procedures fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No surgery records found.</p>
+              </div>
+
+              <div *ngFor="let surgery of patientProfile.surgeries" class="border rounded mb-3">
+                <div class="bg-light p-2 border-bottom d-flex justify-content-between">
+                  <h6 class="mb-0">{{ surgery.title }}</h6>
+                  <small class="text-muted">{{ formatDate(surgery.uploadDate) }}</small>
+                </div>
+                <div class="p-2">
+                  <p *ngIf="surgery.description" class="small mb-2">{{ surgery.description }}</p>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewFile(surgery.url)">
+                    <i class="fas fa-file-medical-alt me-1"></i> View Report
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vaccinations -->
+            <div *ngIf="activeDocTab === 'vaccinations'">
+              <div *ngIf="!patientProfile.vaccinations || patientProfile.vaccinations.length === 0" class="text-center py-4">
+                <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No vaccination records found.</p>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover" *ngIf="patientProfile.vaccinations && patientProfile.vaccinations.length > 0">
+                  <thead class="table-light">
+                  <tr>
+                    <th>Vaccine</th>
+                    <th>Dose</th>
+                    <th>Manufacturer</th>
+                    <th>Date</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let vax of patientProfile.vaccinations">
+                    <td><strong>{{ vax.vaccineName }}</strong></td>
+                    <td>{{ vax.doseNumber }}</td>
+                    <td>{{ vax.manufacturer }}</td>
+                    <td>{{ formatDate(vax.vaccinationDate) }}</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

@@ -45,6 +45,8 @@
             <p><strong><i class="fas fa-user me-2"></i>Nom:</strong> {{ patientProfile.fullName }}</p>
             <p><strong><i class="fas fa-birthday-cake me-2"></i>Date de naissance:</strong> {{ patientProfile.birthDate | date }}</p>
             <p><strong><i class="fas fa-tint me-2"></i>Groupe sanguin:</strong> {{ patientProfile.bloodType || 'Non spécifié' }}</p>
+            <p><strong><i class="fas fa-birthday-cake me-2"></i>email</strong> {{ patientProfile.email || 'nosp' }}</p>
+
           </div>
           <div class="medical-info mb-3">
             <p><strong><i class="fas fa-allergies me-2"></i>Allergies:</strong> {{ patientProfile.allergies || 'Aucune connue' }}</p>
@@ -109,7 +111,7 @@
 
     <!-- Right Column - Actions -->
     <div class="col-md-4">
-      <div class="card shadow-sm h-100">
+      <div class="card shadow-sm">
         <div class="card-header bg-teal text-white">
           <h3 class="card-title mb-0">Actions</h3>
         </div>
@@ -128,15 +130,15 @@
               <h5 class="border-bottom pb-2">Scan Médical</h5>
               <div class="mb-2">
                 <label class="form-label small">Fichier</label>
-                <input type="file" class="form-control form-control-sm" (change)="onScanFileChange($event)" accept=".pdf,.jpg,.png">
+                <input type="file" id="scanFileInput" class="form-control form-control-sm" (change)="onScanFileChange($event)" accept=".pdf,.jpg,.png">
               </div>
               <div class="mb-2">
                 <label class="form-label small">Titre</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="scanPayload.title" name="scanTitle">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="scanPayload.title" name="scanTitle" placeholder="Titre du scan (obligatoire)">
               </div>
               <div class="mb-3">
                 <label class="form-label small">Description</label>
-                <textarea class="form-control form-control-sm" [(ngModel)]="scanPayload.description" name="scanDesc" rows="2"></textarea>
+                <textarea class="form-control form-control-sm" [(ngModel)]="scanPayload.description" name="scanDesc" rows="2" placeholder="Description du scan"></textarea>
               </div>
               <button class="btn btn-sm btn-primary w-100" (click)="uploadScan()" [disabled]="!scanFile">
                 <i class="fas fa-upload me-1"></i>Téléverser Scan
@@ -147,40 +149,216 @@
               <h5 class="border-bottom pb-2">Analyse Médicale</h5>
               <div class="mb-2">
                 <label class="form-label small">Fichier</label>
-                <input type="file" class="form-control form-control-sm" (change)="onAnalysisFileChange($event)" accept=".pdf,.jpg,.png">
+                <input type="file" id="analysisFileInput" class="form-control form-control-sm" (change)="onAnalysisFileChange($event)" accept=".pdf,.jpg,.png">
               </div>
               <div class="mb-2">
                 <label class="form-label small">Titre</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="analysisPayload.title" name="analysisTitle">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="analysisPayload.title" name="analysisTitle" placeholder="Titre de l'analyse (obligatoire)">
               </div>
               <div class="mb-3">
                 <label class="form-label small">Description</label>
-                <textarea class="form-control form-control-sm" [(ngModel)]="analysisPayload.description" name="analysisDesc" rows="2"></textarea>
+                <textarea class="form-control form-control-sm" [(ngModel)]="analysisPayload.description" name="analysisDesc" rows="2" placeholder="Description de l'analyse"></textarea>
               </div>
               <button class="btn btn-sm btn-primary w-100" (click)="uploadAnalysis()" [disabled]="!analysisFile">
                 <i class="fas fa-upload me-1"></i>Téléverser Analyse
               </button>
             </div>
 
-            <div class="upload-type">
+            <div class="upload-type mb-4">
               <h5 class="border-bottom pb-2">Rapport de Chirurgie</h5>
               <div class="mb-2">
                 <label class="form-label small">Fichier</label>
-                <input type="file" class="form-control form-control-sm" (change)="onSurgeryFileChange($event)" accept=".pdf,.jpg,.png">
+                <input type="file" id="surgeryFileInput" class="form-control form-control-sm" (change)="onSurgeryFileChange($event)" accept=".pdf,.jpg,.png">
               </div>
               <div class="mb-2">
                 <label class="form-label small">Titre</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="surgeryPayload.title" name="surgeryTitle">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="surgeryPayload.title" name="surgeryTitle" placeholder="Titre du rapport (obligatoire)">
               </div>
               <div class="mb-3">
                 <label class="form-label small">Description</label>
-                <textarea class="form-control form-control-sm" [(ngModel)]="surgeryPayload.description" name="surgeryDesc" rows="2"></textarea>
+                <textarea class="form-control form-control-sm" [(ngModel)]="surgeryPayload.description" name="surgeryDesc" rows="2" placeholder="Description de la chirurgie"></textarea>
               </div>
               <button class="btn btn-sm btn-primary w-100" (click)="uploadSurgery()" [disabled]="!surgeryFile">
                 <i class="fas fa-upload me-1"></i>Téléverser Rapport
               </button>
             </div>
+
+            <!-- Vaccination Form - Now inside the collapsible section -->
+            <div class="upload-type mb-4 p-3 bg-light rounded">
+              <h5 class="border-bottom pb-2">Nouvelle Vaccination</h5>
+              <div class="form-group mb-2">
+                <label class="form-label small">Nom du vaccin</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="vaccination.vaccineName" placeholder="Ex: Pfizer COVID-19, BCG, Hépatite B...">
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label small">Numéro de dose</label>
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="vaccination.doseNumber" min="1" value="1">
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label small">Fabricant</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="vaccination.manufacturer" placeholder="Ex: Pfizer, Moderna, Sanofi...">
+              </div>
+              <div class="form-group mb-3">
+                <label class="form-label small">Date</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="vaccination.date">
+              </div>
+              <button class="btn btn-success w-100" (click)="addVaccination()">
+                <i class="fas fa-syringe me-2"></i>Enregistrer Vaccination
+              </button>
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medical Files Display Section -->
+  <div class="card shadow-sm mt-4" *ngIf="patientProfile">
+    <div class="card-header bg-primary text-white">
+      <h3 class="card-title mb-0">Documents Médicaux</h3>
+    </div>
+
+    <div class="card-body">
+      <!-- Tabs for different document types -->
+      <ul class="nav nav-tabs" id="medicalDocTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="activeDocTab === 'scans'" id="scans-tab" data-bs-toggle="tab" data-bs-target="#scans" type="button" role="tab" aria-controls="scans" (click)="setActiveDocTab('scans')" [attr.aria-selected]="activeDocTab === 'scans'">
+            <i class="fas fa-x-ray me-2"></i>Imageries ({{ patientProfile.scans?.length || 0 }})
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="activeDocTab === 'analyses'" id="analyses-tab" data-bs-toggle="tab" data-bs-target="#analyses" type="button" role="tab" aria-controls="analyses" (click)="setActiveDocTab('analyses')" [attr.aria-selected]="activeDocTab === 'analyses'">
+            <i class="fas fa-vial me-2"></i>Analyses ({{ patientProfile.analyses?.length || 0 }})
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="activeDocTab === 'surgeries'" id="surgeries-tab" data-bs-toggle="tab" data-bs-target="#surgeries" type="button" role="tab" aria-controls="surgeries" (click)="setActiveDocTab('surgeries')" [attr.aria-selected]="activeDocTab === 'surgeries'">
+            <i class="fas fa-procedures me-2"></i>Chirurgies ({{ patientProfile.surgeries?.length || 0 }})
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="activeDocTab === 'vaccinations'" id="vaccinations-tab" data-bs-toggle="tab" data-bs-target="#vaccinations" type="button" role="tab" aria-controls="vaccinations" (click)="setActiveDocTab('vaccinations')" [attr.aria-selected]="activeDocTab === 'vaccinations'">
+            <i class="fas fa-syringe me-2"></i>Vaccinations ({{ patientProfile.vaccinations?.length || 0 }})
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab content -->
+      <div class="tab-content pt-3" id="medicalDocContent">
+        <!-- Scans Tab -->
+        <div class="tab-pane fade" [class.show]="activeDocTab === 'scans'" [class.active]="activeDocTab === 'scans'" id="scans" role="tabpanel" aria-labelledby="scans-tab">
+          <div *ngIf="patientProfile.scans?.length; else noScans">
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let scan of patientProfile.scans">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ scan.title }}</h5>
+                    <small class="text-muted">{{ scan.uploadDate | date }}</small>
+                  </div>
+                  <div class="card-body">
+                    <p>{{ scan.description }}</p>
+                    <button class="btn btn-sm btn-outline-primary" (click)="openFile(scan.url)">
+                      <i class="fas fa-file-medical me-1"></i>Voir le document
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noScans>
+            <div class="text-center py-4">
+              <i class="fas fa-x-ray fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Aucune image médicale trouvée pour ce patient</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Analyses Tab -->
+        <div class="tab-pane fade" [class.show]="activeDocTab === 'analyses'" [class.active]="activeDocTab === 'analyses'" id="analyses" role="tabpanel" aria-labelledby="analyses-tab">
+          <div *ngIf="patientProfile.analyses?.length; else noAnalyses">
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let analysis of patientProfile.analyses">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ analysis.title }}</h5>
+                    <small class="text-muted">{{ analysis.uploadDate | date }}</small>
+                  </div>
+                  <div class="card-body">
+                    <p>{{ analysis.description }}</p>
+                    <button class="btn btn-sm btn-outline-primary" (click)="openFile(analysis.url)">
+                      <i class="fas fa-file-alt me-1"></i>Voir le rapport
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noAnalyses>
+            <div class="text-center py-4">
+              <i class="fas fa-vial fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Aucune analyse trouvée pour ce patient</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Surgeries Tab -->
+        <div class="tab-pane fade" [class.show]="activeDocTab === 'surgeries'" [class.active]="activeDocTab === 'surgeries'" id="surgeries" role="tabpanel" aria-labelledby="surgeries-tab">
+          <div *ngIf="patientProfile.surgeries?.length; else noSurgeries">
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let surgery of patientProfile.surgeries">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ surgery.title }}</h5>
+                    <small class="text-muted">{{ surgery.uploadDate | date }}</small>
+                  </div>
+                  <div class="card-body">
+                    <p>{{ surgery.description }}</p>
+                    <button class="btn btn-sm btn-outline-primary" (click)="openFile(surgery.url)">
+                      <i class="fas fa-file-medical-alt me-1"></i>Voir le rapport
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noSurgeries>
+            <div class="text-center py-4">
+              <i class="fas fa-procedures fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Aucun rapport de chirurgie trouvé pour ce patient</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Vaccinations Tab -->
+        <div class="tab-pane fade" [class.show]="activeDocTab === 'vaccinations'" [class.active]="activeDocTab === 'vaccinations'" id="vaccinations" role="tabpanel" aria-labelledby="vaccinations-tab">
+          <div *ngIf="patientProfile.vaccinations?.length; else noVaccinations">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                <tr>
+                  <th>Vaccin</th>
+                  <th>Dose</th>
+                  <th>Fabricant</th>
+                  <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let vax of patientProfile.vaccinations">
+                  <td><strong>{{ vax.vaccineName }}</strong></td>
+                  <td>{{ vax.doseNumber }}</td>
+                  <td>{{ vax.manufacturer }}</td>
+                  <td>{{ vax.vaccinationDate | date }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <ng-template #noVaccinations>
+            <div class="text-center py-4">
+              <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Aucun vaccin enregistré pour ce patient</p>
+            </div>
+          </ng-template>
         </div>
       </div>
     </div>
@@ -228,5 +406,17 @@
     padding: 10px;
     border-radius: 5px;
     background-color: #f8f9fa;
+  }
+  .nav-tabs .nav-link.active {
+    border-color: transparent;
+    border-bottom: 3px solid #0d6efd;
+    font-weight: bold;
+  }
+  .tab-pane.fade.show.active {
+    animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 </style>
