@@ -4,13 +4,15 @@ import com.amn.entity.enums.MedicationType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Medication {
+public class
+Medication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,15 +33,18 @@ public class Medication {
     @Enumerated(EnumType.STRING)
     private MedicationType type; // ✅ Required for OTC vs PRESCRIPTION
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prescription_id")
+    @BatchSize(size = 10)
     @JsonIgnore
     private Prescription prescription;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
+    @BatchSize(size = 10)
     private Pharmacist addedBy; // ✅ Required for setAddedBy()
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
+    @BatchSize(size = 10)
     private Patient patient; // ✅ Required for setPatient()
 }

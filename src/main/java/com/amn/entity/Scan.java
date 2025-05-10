@@ -31,7 +31,7 @@ public class Scan {
     private FileType fileType;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medical_folder_id")
     @JsonIgnore
     private MedicalFolder medicalFolder;

@@ -1,37 +1,41 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PrescriptionDTO } from '../models/prescription.dto';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class PharmacistService {
-  private apiUrl = 'http://localhost:8080/api/pharmacist';
+  private API_URL = 'http://localhost:8080/api/pharmacist';
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private getJwt(): string | null {
+    return localStorage.getItem('jwt');
+  }
+
+  private getHeaders(): HttpHeaders {
+    const token = this.getJwt();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  }
 
   /**
-   * ✅ Get prescriptions by CIN and Full Name with optional status filter.
-   * Default status is 'ALL'. Can also be 'DISPENSED', 'PENDING', etc.
+   * ✅ Get Prescriptions by CIN and Full Name with optional status filter
    */
-  getPrescriptions(cin: string, fullName: string, status: string = 'ALL'): Observable<PrescriptionDTO[]> {
-    return this.http.get<PrescriptionDTO[]>(`${this.apiUrl}/prescriptions`, {
-      params: { cin, fullName, status },
+  getPrescriptions(cin: string, fullName: string, status: string = 'ALL'): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/prescriptions`, {
+      headers: this.getHeaders(),
+      params: { cin, fullName, status }
     });
   }
 
   /**
-   * ✅ Mark a prescription as DISPENSED
+   * ✅ Mark Prescription as DISPENSED
    */
-  markAsDispensed(prescriptionId: number): Observable<PrescriptionDTO> {
-    return this.http.put<PrescriptionDTO>(`${this.apiUrl}/prescriptions/${prescriptionId}/dispense`, {});
-  }
-
-  /**
-   * ✅ Get a single prescription by ID
-   */
-  getPrescriptionById(id: number): Observable<PrescriptionDTO> {
-    return this.http.get<PrescriptionDTO>(`${this.apiUrl}/prescriptions/${id}`);
+  markAsDispensed(prescriptionId: number): Observable<any> {
+    return this.http.put(`${this.API_URL}/prescriptions/${prescriptionId}/dispense`, {}, {
+      headers: this.getHeaders()
+    });
   }
 }

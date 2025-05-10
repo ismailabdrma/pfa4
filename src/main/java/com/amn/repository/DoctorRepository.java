@@ -13,4 +13,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     Optional<Doctor> findByMatricule(String matricule);
 
     List<Doctor> findAllByStatus(AccountStatus status);
+    Optional<Doctor> findById(Long id);
+
+
+
 }

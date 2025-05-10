@@ -16,7 +16,7 @@ import { DoctorComponent } from './dashboard/doctor/doctor.component';
 import { PharmacistComponent } from './dashboard/pharmacist/pharmacist.component';
 import { AdminComponent } from './dashboard/admin/admin.component';
 import { CreateMedicalFolderComponent } from './dashboard/doctor/create-medical-folder/create-medical-folder.component';
-import { PatientProfileComponent } from './dashboard/doctor/patient-profile/patient-profile.component';
+
 import { UploadScanComponent } from './dashboard/doctor/upload-scan.component';
 import { ScanDetailComponent } from './dashboard/doctor/scan-detail/scan-detail.component';
 import { SurgeryDetailComponent } from './dashboard/doctor/surgery-detail/surgery-detail.component';
@@ -46,7 +46,7 @@ export const routes: Routes = [
   { path: 'dashboard/pharmacist', component: PharmacistComponent },
   { path: 'dashboard/admin', component: AdminComponent },
   { path: 'dashboard/doctor/create-folder', component: CreateMedicalFolderComponent },
-  { path: 'dashboard/doctor/patient-profile', component: PatientProfileComponent },
+
   {path: 'dashboard/doctor/upload-scan', component: UploadScanComponent },
   { path: 'dashboard/doctor/scan/:scanId', component: ScanDetailComponent },
   { path: 'dashboard/doctor/surgery/:surgeryId', component: SurgeryDetailComponent},

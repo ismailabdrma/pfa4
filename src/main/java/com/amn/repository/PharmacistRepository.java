@@ -12,4 +12,8 @@ public interface PharmacistRepository extends JpaRepository<Pharmacist, Long> {
     Optional<Pharmacist> findByMatricule(String matricule);
 
     List<Pharmacist> findAllByStatus(AccountStatus status);
+    Optional<Pharmacist> findByEmailAndStatus(String email, AccountStatus status);
+    Optional<Pharmacist> findById(Long id);
+
+
 }

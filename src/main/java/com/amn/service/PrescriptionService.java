@@ -116,4 +116,26 @@ public class PrescriptionService {
                 .map(PrescriptionDTO::fromEntity)
                 .collect(Collectors.toList());
     }
+    /**
+     * ✅ Fetch prescriptions by Medical Record ID
+     */
+    public List<PrescriptionDTO> getPrescriptionsByRecordId(Long recordId) {
+        List<Prescription> prescriptions = prescriptionRepository.findAll().stream()
+                .filter(prescription -> prescription.getMedicalRecord() != null
+                        && prescription.getMedicalRecord().getId().equals(recordId))
+                .collect(Collectors.toList());
+
+        return prescriptions.stream()
+                .map(prescription -> {
+                    List<MedicationDTO> medications = medicationRepository.findByPrescriptionId(prescription.getId()).stream()
+                            .map(MedicationDTO::fromEntity)
+                            .collect(Collectors.toList());
+
+                    PrescriptionDTO dto = PrescriptionDTO.fromEntity(prescription);
+                    dto.setMedications(medications);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

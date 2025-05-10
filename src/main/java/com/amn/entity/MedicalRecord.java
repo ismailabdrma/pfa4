@@ -7,7 +7,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 
 @Data
@@ -34,14 +37,23 @@ public class MedicalRecord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
     @JsonIgnore
+    @BatchSize(size = 10)
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
+    @BatchSize(size = 10)
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medical_folder_id")
-    @JsonIgnore// fixed here
+    @JsonIgnore//
+    @BatchSize(size = 10)// fixed here
     private MedicalFolder medicalFolder;
+    // ✅ Add this relationship
+    @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @BatchSize(size = 10)
+
+    private List<Prescription> prescriptions;
 }

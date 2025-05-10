@@ -8,6 +8,7 @@ import com.amn.service.DoctorService;
 import com.amn.service.FileStorageService;
 import com.amn.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,15 +27,12 @@ public class DoctorController {
 
     private final DoctorService doctorService;
     private final FileStorageService fileStorageService;
-    private final PrescriptionRepository prescriptionRepository;
-    private final MedicalRecordRepository medicalRecordRepository;
     private final PrescriptionService prescriptionService;
+    private final MedicalRecordRepository medicalRecordRepository;
 
-    @GetMapping("/folder")
-    public ResponseEntity<MedicalFolder> getPatientFolder(@RequestParam String cin, @RequestParam String fullName) {
-        return ResponseEntity.ok(doctorService.getMedicalFolderByCinAndName(cin, fullName));
-    }
-
+    /**
+     * ✅ Create or update a medical record
+     */
     @PostMapping("/add-record/{patientId}")
     public ResponseEntity<MedicalRecord> createMedicalRecord(
             @PathVariable Long patientId,
@@ -45,141 +43,67 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.createMedicalRecord(patientId, record, doctorEmail));
     }
 
-
-
-    @PostMapping("/prescribe/{patientId}")
-    public ResponseEntity<Prescription> writePrescription(
+    /**
+     * ✅ Write a new prescription
+     */
+    @PostMapping("/prescribe/{patientId}/{recordId}")
+    public ResponseEntity<PrescriptionDTO> writePrescription(
             @PathVariable Long patientId,
-            @RequestBody Prescription prescription,
+            @PathVariable Long recordId,
+            @RequestBody PrescriptionDTO prescriptionDTO,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String email = userDetails.getUsername();
-        return ResponseEntity.ok(doctorService.writePrescription(patientId, prescription, email));
+        PrescriptionDTO createdPrescription = doctorService.writePrescription(patientId, recordId, prescriptionDTO, email);
+        return ResponseEntity.ok(createdPrescription);
     }
 
+    /**
+     * ✅ Create a prescription with medications
+     */
     @PostMapping("/consultation/{patientId}/{recordId}/prescription")
     public ResponseEntity<PrescriptionDTO> createPrescriptionWithMedications(
             @PathVariable Long patientId,
             @PathVariable Long recordId,
             @RequestBody PrescriptionRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
         String email = userDetails.getUsername();
         PrescriptionDTO dto = prescriptionService.createPrescriptionWithMedications(patientId, recordId, request, email);
         return ResponseEntity.ok(dto);
     }
 
-
-
-    @GetMapping("/get-id")
-    public ResponseEntity<Long> getPatientId(@RequestParam String cin, @RequestParam String fullName) {
-        return ResponseEntity.ok(doctorService.getPatientIdByCinAndName(cin, fullName));
-    }
-
-    @PostMapping("/create-folder/{cin}")
-    public ResponseEntity<?> createFolderWithDetails(@PathVariable String cin, @RequestParam String fullName, @RequestBody Map<String, String> body) {
-        Long patientId = doctorService.getPatientIdByCinAndName(cin, fullName);
-        doctorService.createOrUpdateFolderWithPatientDetails(patientId, body);
-        return ResponseEntity.ok().build();
-    }
-
+    /**
+     * ✅ Get Patient Full Profile
+     */
     @GetMapping("/full-profile")
-    public ResponseEntity<PatientProfileDTO> getFullPatientProfile(@RequestParam String cin, @RequestParam String fullName) {
+    public ResponseEntity<PatientProfileDTO> getFullPatientProfile(
+            @RequestParam String cin,
+            @RequestParam String fullName
+    ) {
         return ResponseEntity.ok(doctorService.getFullPatientProfile(cin, fullName));
     }
 
-    @PostMapping("/upload-scan")
-    public ResponseEntity<Scan> uploadScanLink(@RequestBody Scan scan, @RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.saveScanFromLink(scan, folderId));
-    }
-
-    @PostMapping("/upload-scan-file")
-    public ResponseEntity<Scan> uploadScanFile(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("folderId") Long folderId) {
-        return ResponseEntity.ok(doctorService.uploadScanLocally(file, title, description, folderId));
-    }
-
-    @PostMapping("/upload-analysis")
-    public ResponseEntity<AnalysisDTO> uploadAnalysis(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("folderId") Long folderId) {
-        return ResponseEntity.ok(doctorService.uploadAnalysisLocally(file, title, description, folderId));
-    }
-
-    @PostMapping("/upload-surgery")
-    public ResponseEntity<Surgery> uploadSurgery(
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("folderId") Long folderId) {
-        return ResponseEntity.ok(doctorService.uploadSurgeryLocally(file, title, description, folderId));
-    }
-
-    @PostMapping("/add-vaccination")
-    public ResponseEntity<Vaccination> addVaccination(@RequestParam String vaccineName, @RequestParam int doseNumber, @RequestParam String manufacturer, @RequestParam String date, @RequestParam Long folderId) {
-        LocalDate vaccinationDate = LocalDate.parse(date);
-        return ResponseEntity.ok(doctorService.addVaccinationRecord(folderId, vaccineName, doseNumber, manufacturer, vaccinationDate));
-    }
-    @GetMapping("/scan/{id}")
-    public ResponseEntity<ScanDTO> getScanById(@PathVariable Long id) {
-        Scan scan = fileStorageService.getScanById(id);
-        return ResponseEntity.ok(ScanDTO.fromEntity(scan));
-    }
-
-
-    @GetMapping("/analysis/{id}")
-    public ResponseEntity<AnalysisDTO> getAnalysisById(@PathVariable Long id) {
-        return ResponseEntity.ok(AnalysisDTO.fromEntity(fileStorageService.getAnalysisById(id)));
-    }
-
-    @GetMapping("/surgery/{id}")
-    public ResponseEntity<SurgeryDTO> getSurgeryById(@PathVariable Long id) {
-        return ResponseEntity.ok(SurgeryDTO.fromEntity(fileStorageService.getSurgeryById(id)));
-    }
-
-    @GetMapping("/scans")
-    public ResponseEntity<List<ScanDTO>> getScansByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getScansByFolderId(folderId).stream().map(ScanDTO::fromEntity).toList());
-    }
-
-    @GetMapping("/analyses")
-    public ResponseEntity<List<AnalysisDTO>> getAnalysesByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getAnalysesByFolderId(folderId).stream().map(AnalysisDTO::fromEntity).toList());
-    }
-
-    @GetMapping("/surgeries")
-    public ResponseEntity<List<SurgeryDTO>> getSurgeriesByFolder(@RequestParam Long folderId) {
-        return ResponseEntity.ok(fileStorageService.getSurgeriesByFolderId(folderId).stream().map(SurgeryDTO::fromEntity).toList());
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<Doctor> getDoctorProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        Doctor doctor = doctorService.getCurrentDoctorProfile(email);
-        return ResponseEntity.ok(doctor);
-    }
-
+    /**
+     * ✅ Get a single prescription by ID
+     */
     @GetMapping("/prescription/{id}")
     public ResponseEntity<PrescriptionDTO> getPrescriptionById(@PathVariable Long id) {
-        Prescription prescription = prescriptionRepository.findById(id).orElseThrow(() -> new RuntimeException("Prescription not found"));
-        return ResponseEntity.ok(PrescriptionDTO.fromEntity(prescription));
+        PrescriptionDTO prescription = prescriptionService.getById(id);
+        return ResponseEntity.ok(prescription);
     }
 
+    /**
+     * ✅ Get consultation by record ID including associated prescriptions
+     */
     @GetMapping("/consultation/{id}")
     public ResponseEntity<ConsultationWithPrescriptionDTO> getConsultationById(@PathVariable Long id) {
         MedicalRecord record = medicalRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consultation not found"));
 
-        Prescription prescription = prescriptionRepository.findByMedicalRecordId(id).orElse(null);
+        List<PrescriptionDTO> prescriptions = prescriptionService.getPrescriptionsByRecordId(id);
 
-        String doctorName = (record.getDoctor() != null)
-                ? record.getDoctor().getFullName()
-                : "Docteur inconnu";
+        String doctorName = record.getDoctor() != null ? record.getDoctor().getFullName() : "Docteur inconnu";
 
         ConsultationWithPrescriptionDTO dto = new ConsultationWithPrescriptionDTO(
                 record.getId(),
@@ -188,10 +112,66 @@ public class DoctorController {
                 record.getNotes(),
                 record.getCreationDate().atStartOfDay(),
                 doctorName,
-                prescription != null ? PrescriptionDTO.fromEntity(prescription) : null
+                prescriptions
         );
 
         return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * ✅ Get Patient ID by CIN and Full Name
+     */
+    @GetMapping("/get-id")
+    public ResponseEntity<Long> getPatientId(@RequestParam String cin, @RequestParam String fullName) {
+        return ResponseEntity.ok(doctorService.getPatientIdByCinAndName(cin, fullName));
+    }
+
+    /**
+     * ✅ Upload Scan File
+     */
+    @PostMapping("/upload-scan-file")
+    public ResponseEntity<Scan> uploadScanFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadScanLocally(file, title, description, folderId));
+    }
+
+    /**
+     * ✅ Upload Analysis File
+     */
+    @PostMapping("/upload-analysis")
+    public ResponseEntity<AnalysisDTO> uploadAnalysis(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadAnalysisLocally(file, title, description, folderId));
+    }
+
+    /**
+     * ✅ Upload Surgery File
+     */
+    @PostMapping("/upload-surgery")
+    public ResponseEntity<Surgery> uploadSurgery(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("folderId") Long folderId
+    ) {
+        return ResponseEntity.ok(doctorService.uploadSurgeryLocally(file, title, description, folderId));
+    }
+    @GetMapping("/me")
+    public ResponseEntity<DoctorDTO> getCurrentDoctorProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        Doctor doctor = doctorService.findByEmail(email);
+        if (doctor == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(new DoctorDTO(doctor));
     }
 
 

@@ -5,10 +5,13 @@ import com.amn.dto.PharmacistDTO;
 import com.amn.dto.UserDTO;
 import com.amn.service.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -18,36 +21,54 @@ public class AdminController {
     private final AdminService adminService;
 
     /**
-     * ✅ Approve Doctor
+     * ✅ Approve User (Doctor/Pharmacist)
      */
-    @PostMapping("/approve-doctor/{id}")
-    public ResponseEntity<DoctorDTO> approveDoctor(@PathVariable Long id) {
-        DoctorDTO approvedDoctor = adminService.approveDoctor(id);
-        return ResponseEntity.ok(approvedDoctor);
+    @PatchMapping("/users/approve/{id}")
+    public ResponseEntity<Map<String, String>> approveUser(@PathVariable Long id) {
+        adminService.approveUser(id);
+        return ResponseEntity.ok(Map.of("message", "User approved successfully."));
     }
 
     /**
-     * ✅ Approve Pharmacist
+     * ✅ Reject User (Doctor/Pharmacist)
      */
-    @PostMapping("/approve-pharmacist/{id}")
-    public ResponseEntity<PharmacistDTO> approvePharmacist(@PathVariable Long id) {
-        PharmacistDTO approvedPharmacist = adminService.approvePharmacist(id);
-        return ResponseEntity.ok(approvedPharmacist);
+    @PatchMapping("/users/reject/{id}")
+    public ResponseEntity<Map<String, String>> rejectUser(@PathVariable Long id) {
+        adminService.rejectUser(id);
+        return ResponseEntity.ok(Map.of("message", "User rejected successfully."));
     }
 
     /**
-     * ✅ Get Pending Doctors
+     * ✅ Suspend User (Doctor/Pharmacist Only)
      */
-    @GetMapping("/pending-doctors")
+    @PatchMapping("/users/suspend/{id}")
+    public ResponseEntity<Map<String, String>> suspendUser(@PathVariable Long id) {
+        adminService.suspendUser(id);
+        return ResponseEntity.ok(Map.of("message", "User suspended successfully."));
+    }
+
+    /**
+     * ✅ Delete User (Doctor/Pharmacist Only)
+     */
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.ok(Map.of("message", "User deleted successfully."));
+    }
+
+    /**
+     * ✅ Get All Pending Doctors
+     */
+    @GetMapping("/users/pending-doctors")
     public ResponseEntity<List<DoctorDTO>> getPendingDoctors() {
         List<DoctorDTO> pendingDoctors = adminService.getPendingDoctors();
         return ResponseEntity.ok(pendingDoctors);
     }
 
     /**
-     * ✅ Get Pending Pharmacists
+     * ✅ Get All Pending Pharmacists
      */
-    @GetMapping("/pending-pharmacists")
+    @GetMapping("/users/pending-pharmacists")
     public ResponseEntity<List<PharmacistDTO>> getPendingPharmacists() {
         List<PharmacistDTO> pendingPharmacists = adminService.getPendingPharmacists();
         return ResponseEntity.ok(pendingPharmacists);
@@ -56,7 +77,7 @@ public class AdminController {
     /**
      * ✅ Get All Doctors
      */
-    @GetMapping("/doctors")
+    @GetMapping("/users/doctors")
     public ResponseEntity<List<DoctorDTO>> getAllDoctors() {
         List<DoctorDTO> doctors = adminService.getAllDoctors();
         return ResponseEntity.ok(doctors);
@@ -65,39 +86,18 @@ public class AdminController {
     /**
      * ✅ Get All Pharmacists
      */
-    @GetMapping("/pharmacists")
+    @GetMapping("/users/pharmacists")
     public ResponseEntity<List<PharmacistDTO>> getAllPharmacists() {
         List<PharmacistDTO> pharmacists = adminService.getAllPharmacists();
         return ResponseEntity.ok(pharmacists);
     }
 
     /**
-     * ✅ Get All Users (Patients Only)
+     * ✅ Get All Patients
      */
-    // ✅ Get All Patients
-    @GetMapping("/patients")
+    @GetMapping("/users/patients")
     public ResponseEntity<List<UserDTO>> getAllPatients() {
         List<UserDTO> patients = adminService.getAllPatients();
         return ResponseEntity.ok(patients);
     }
-
-
-    /**
-     * ✅ Suspend User (Doctor/Pharmacist Only)
-     */
-    @PatchMapping("/suspend/{id}")
-    public ResponseEntity<String> suspendUser(@PathVariable Long id) {
-        adminService.suspendUser(id);
-        return ResponseEntity.ok("User suspended successfully.");
-    }
-
-    /**
-     * ✅ Delete User (Doctor/Pharmacist Only)
-     */
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        adminService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully.");
-    }
-
 }

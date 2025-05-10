@@ -1,46 +1,65 @@
-<div class="p-6 bg-gray-50 min-h-screen">
-  <h1 class="text-2xl font-bold mb-6">Mon Dossier Médical</h1>
+<div class="container mx-auto p-4 bg-white shadow rounded-lg">
+  <h2 class="text-2xl font-semibold mb-4">Patient Profile</h2>
 
-  <!-- Search Form -->
-  <div class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Rechercher votre dossier</h2>
-    <div class="flex space-x-4">
-      <input [(ngModel)]="cin" placeholder="CIN" class="border p-2 flex-1" />
-      <button (click)="getPatientProfile()" class="bg-blue-600 text-white px-4 py-2 rounded">Rechercher</button>
+  <div *ngIf="isLoading" class="text-center py-4">
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="text-red-500 py-2">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="successMessage" class="text-green-500 py-2">
+    <p>{{ successMessage }}</p>
+  </div>
+
+  <div *ngIf="patientBasicInfo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-gray-100 p-4 rounded-lg shadow">
+      <h3 class="text-lg font-semibold">Personal Information</h3>
+      <p><strong>Full Name:</strong> {{ patientBasicInfo.fullName }}</p>
+      <p><strong>CIN:</strong> {{ patientBasicInfo.cin }}</p>
+      <p><strong>Blood Type:</strong> {{ patientBasicInfo.bloodType }}</p>
+      <p><strong>email:</strong> {{ patientBasicInfo.email }}</p>
+      <p><strong>address:</strong> {{ patientBasicInfo.address }}</p>
+      <p><strong>phone number:</strong> {{ patientBasicInfo.phone }}</p>
+
     </div>
-    <p class="text-red-500 mt-2">{{ errorMessage }}</p>
-  </div>
 
-  <!-- Patient Profile -->
-  <div *ngIf="patientProfile" class="bg-white shadow rounded p-4 mb-6">
-    <h2 class="text-lg font-semibold mb-2">Profile: {{ patientProfile?.fullName }}</h2>
-    <p><strong>CIN:</strong> {{ patientProfile?.cin }}</p>
-    <p><strong>Email:</strong> {{ patientProfile?.email }}</p>
-    <p><strong>Phone:</strong> {{ patientProfile?.phone }}</p>
-    <p><strong>Blood Type:</strong> {{ patientProfile?.bloodType }}</p>
-    <p><strong>Emergency Contact:</strong> {{ patientProfile?.emergencyContact }}</p>
-    <p><strong>Allergies:</strong> {{ patientProfile?.allergies }}</p>
-    <p><strong>Chronic Diseases:</strong> {{ patientProfile?.chronicDiseases }}</p>
-  </div>
+    <div class="bg-gray-100 p-4 rounded-lg shadow">
+      <h3 class="text-lg font-semibold mb-2">Update Information</h3>
 
-  <!-- Prescriptions -->
-  <div *ngIf="patientProfile?.prescriptions?.length" class="bg-white shadow rounded p-4">
-    <h2 class="text-lg font-semibold mb-4">Ordonnances</h2>
-    <ul>
-      <li *ngFor="let prescription of patientProfile?.prescriptions ?? []">
-        {{ prescription.prescribedDate | date: 'short' }} - {{ prescription.status }}
-        <ul>
-          <li *ngFor="let med of prescription.medications ?? []">
-            {{ med.name }} - {{ med.dosage }}
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
+      <form (submit)="updateBasicInfo()">
+        <div class="mb-3">
+          <label class="block font-medium mb-1">Email</label>
+          <input
+            type="email"
+            [(ngModel)]="patientBasicInfo.email"
+            class="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
 
-  <!-- No Prescriptions Message -->
-  <div *ngIf="patientProfile?.prescriptions?.length === 0" class="text-gray-500">
-    Aucune ordonnance trouvée.
+        <div class="mb-3">
+          <label class="block font-medium mb-1">Phone</label>
+          <input
+            type="text"
+            [(ngModel)]="patientBasicInfo.phone"
+            class="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="block font-medium mb-1">Address</label>
+          <input
+            type="text"
+            [(ngModel)]="patientBasicInfo.address"
+            class="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded mt-2 hover:bg-blue-600">
+          Update Information
+        </button>
+      </form>
+    </div>
   </div>
 </div>
-

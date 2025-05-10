@@ -27,7 +27,7 @@ public class PharmacistController {
 
         List<PrescriptionDTO> prescriptions;
 
-        if ("DISPENSED".equalsIgnoreCase(status)) {
+        if ("ALL".equalsIgnoreCase(status)) {
             prescriptions = pharmacistService.getDispensedPrescriptionsByCinAndName(cin, fullName);
         } else {
             prescriptions = pharmacistService.getPrescriptionsByCinAndName(cin, fullName);

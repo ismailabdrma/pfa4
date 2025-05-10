@@ -21,7 +21,7 @@ public class Appointment {
     private LocalDateTime dateTime;
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private MedicalFolder medicalFolder;
 }

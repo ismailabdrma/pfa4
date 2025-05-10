@@ -21,9 +21,7 @@
       <td class="p-2">{{ patient.fullName }}</td>
       <td class="p-2">{{ patient.email }}</td>
       <td class="p-2">
-        <button (click)="deleteUser(patient.id)" class="bg-red-500 text-white px-2 py-1 rounded">
-          Delete
-        </button>
+        <button (click)="deleteUser(patient.id)" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
       </td>
     </tr>
     </tbody>
@@ -50,12 +48,9 @@
       <td class="p-2">{{ doctor.specialty }}</td>
       <td class="p-2">{{ doctor.status }}</td>
       <td class="p-2">
-        <button (click)="suspendUser(doctor.id)" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">
-          Suspend
-        </button>
-        <button (click)="deleteUser(doctor.id)" class="bg-red-500 text-white px-2 py-1 rounded">
-          Delete
-        </button>
+        <button *ngIf="doctor.status === 'PENDING'" (click)="approveUser(doctor.id)" class="bg-green-500 px-2 py-1 mr-2">Approve</button>
+        <button (click)="suspendUser(doctor.id)" class="bg-yellow-500 px-2 py-1 mr-2">Suspend</button>
+        <button (click)="deleteUser(doctor.id)" class="bg-red-500 px-2 py-1">Delete</button>
       </td>
     </tr>
     </tbody>
@@ -80,12 +75,9 @@
       <td class="p-2">{{ pharmacist.matricule }}</td>
       <td class="p-2">{{ pharmacist.status }}</td>
       <td class="p-2">
-        <button (click)="suspendUser(pharmacist.id)" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">
-          Suspend
-        </button>
-        <button (click)="deleteUser(pharmacist.id)" class="bg-red-500 text-white px-2 py-1 rounded">
-          Delete
-        </button>
+        <button *ngIf="pharmacist.status === 'PENDING'" (click)="approveUser(pharmacist.id)" class="bg-green-500 px-2 py-1 mr-2">Approve</button>
+        <button (click)="suspendUser(pharmacist.id)" class="bg-yellow-500 px-2 py-1 mr-2">Suspend</button>
+        <button (click)="deleteUser(pharmacist.id)" class="bg-red-500 px-2 py-1">Delete</button>
       </td>
     </tr>
     </tbody>

@@ -46,20 +46,16 @@ export class ConsultationPrescriptionComponent implements OnInit {
   }
 
   searchPatient() {
-    if (!this.cin || !this.fullName) return;
-
     this.loading = true;
     this.doctorService.getPatientIdByCin(this.cin, this.fullName).subscribe({
-      next: id => {
+      next: (id) => {
         this.patientId = id;
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Patient not found', error);
-        this.loading = false;
+      error: () => {
         alert('Patient introuvable.');
-        // Navigate back to dashboard
-        this.router.navigate(['/doctor/dashboard']);
+        this.router.navigate(['/dashboard/doctor']);
+        this.loading = false;
       }
     });
   }
@@ -71,72 +67,64 @@ export class ConsultationPrescriptionComponent implements OnInit {
   removeMedication(index: number) {
     if (this.medications.length > 1) {
       this.medications.splice(index, 1);
-    } else {
-      // Don't remove the last medication, just clear it
-      this.medications[0] = { name: '', dosage: '', period: '', permanent: false };
     }
   }
 
   submit() {
     if (!this.patientId) {
-      alert("Veuillez d'abord chercher le patient.");
+      alert("Patient ID non trouvé. Veuillez rechercher le patient d'abord.");
       return;
     }
 
     if (!this.record.reason || !this.record.diagnosis) {
-      alert("Veuillez remplir le motif et le diagnostic.");
+      alert("Veuillez remplir les champs Motif et Diagnostic.");
       return;
     }
 
     if (!this.medications[0].name || !this.medications[0].dosage) {
-      alert("Veuillez ajouter au moins un médicament avec nom et dosage.");
+      alert("Veuillez ajouter au moins un médicament.");
       return;
     }
 
     this.loading = true;
 
-    // Step 1: Create consultation record
+    // Step 1: Create a Medical Record
     this.doctorService.createMedicalRecord(this.patientId, this.record).subscribe({
       next: (createdRecord) => {
         const recordId = createdRecord.id;
 
-        // Step 2: Create prescription linked to this consultation
-        const prescription = {
-          medicationName: this.medications.length > 1 ? 'Ordonnance multiple' : this.medications[0].name,
-          dosage: this.medications.length > 1 ? '' : this.medications[0].dosage,
-          period: this.medications.length > 1 ? '' : this.medications[0].period,
-          permanent: this.medications.length > 1 ? false : this.medications[0].permanent,
-          status: 'PENDING'
-        };
-
-        const request = {
-          prescription,
+        // Step 2: Create Prescription and Link Medications
+        const prescriptionRequest = {
+          prescription: {
+            medicationName: this.medications.length > 1 ? 'Multiple' : this.medications[0].name,
+            dosage: this.medications.length > 1 ? '' : this.medications[0].dosage,
+            period: this.medications.length > 1 ? '' : this.medications[0].period,
+            permanent: this.medications.length > 1 ? false : this.medications[0].permanent,
+            status: 'PENDING'
+          },
           medications: this.medications
         };
 
-        this.doctorService.submitPrescriptionWithMedications(this.patientId!, recordId, request).subscribe({
+        this.doctorService.submitPrescriptionWithMedications(
+          this.patientId ?? 0, // Provide a default value (e.g., 0) if `this.patientId` is null
+          recordId,
+          prescriptionRequest
+        ).subscribe({
           next: () => {
             this.loading = false;
             this.success = true;
-
-            // Reset form
-            this.record = { reason: '', diagnosis: '', notes: '' };
-            this.medications = [{ name: '', dosage: '', period: '', permanent: false }];
-
-            // Automatically return to dashboard after 2 seconds
             setTimeout(() => {
-              this.router.navigate(['/doctor/dashboard']);
+              this.router.navigate(['/dashboard/doctor']);
             }, 2000);
           },
-          error: (error) => {
-            console.error('Prescription save error', error);
+          error: () => {
             this.loading = false;
             alert("Erreur lors de l'enregistrement de l'ordonnance.");
           }
         });
+
       },
-      error: (error) => {
-        console.error('Consultation save error', error);
+      error: () => {
         this.loading = false;
         alert("Erreur lors de l'enregistrement de la consultation.");
       }
@@ -144,6 +132,6 @@ export class ConsultationPrescriptionComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/doctor/dashboard']);
+    this.router.navigate(['/dashboard/doctor']);
   }
 }

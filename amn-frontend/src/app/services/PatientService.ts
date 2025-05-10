@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PatientProfileDTO } from '../models/patient-profile.dto';
+
+export interface PatientBasicInfoDTO {
+  id: number;
+  fullName: string;
+  email: string;
+  cin: string;
+  address: string;
+  phone: string;
+  bloodType: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +21,17 @@ export class PatientService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Fetch patient profile by CIN
+   * ✅ Fetch basic patient info by CIN
    */
-  getPatientProfile(cin: string): Observable<PatientProfileDTO> {
-    return this.http.get<PatientProfileDTO>(`${this.apiUrl}/profile`, {
-      params: { cin }
-    });
+  getPatientBasicInfo(cin: string): Observable<PatientBasicInfoDTO> {
+    const params = new HttpParams().set('cin', cin);
+    return this.http.get<PatientBasicInfoDTO>(`${this.apiUrl}/basic-info`, { params });
+  }
+
+  /**
+   * ✅ Update patient basic info
+   */
+  updatePatientBasicInfo(cin: string, basicInfo: PatientBasicInfoDTO): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/basic-info/${cin}`, basicInfo);
   }
 }

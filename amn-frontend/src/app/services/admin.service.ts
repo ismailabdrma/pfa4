@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserDTO } from 'src/app/models/user.dto';
 import { DoctorDTO } from 'src/app/models/doctor.dto';
@@ -14,37 +14,52 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   /**
-   * ✅ Get All Patients
+   * ✅ Safely Get Token
    */
+  private getToken(): string | null {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('auth_token');
+    }
+    return null;
+  }
+
+  /**
+   * ✅ Construct HTTP Options with Authorization Header
+   */
+  private getHttpOptions(): { headers: HttpHeaders } {
+    const token = this.getToken();
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    });
+    return { headers };
+  }
+
   getAllPatients(): Observable<UserDTO[]> {
-    return this.http.get<UserDTO[]>(`${this.apiUrl}/patients`);
+    return this.http.get<UserDTO[]>(`${this.apiUrl}/users/patients`, this.getHttpOptions());
   }
 
-  /**
-   * ✅ Get All Doctors
-   */
   getAllDoctors(): Observable<DoctorDTO[]> {
-    return this.http.get<DoctorDTO[]>(`${this.apiUrl}/doctors`);
+    return this.http.get<DoctorDTO[]>(`${this.apiUrl}/users/doctors`, this.getHttpOptions());
   }
 
-  /**
-   * ✅ Get All Pharmacists
-   */
   getAllPharmacists(): Observable<PharmacistDTO[]> {
-    return this.http.get<PharmacistDTO[]>(`${this.apiUrl}/pharmacists`);
+    return this.http.get<PharmacistDTO[]>(`${this.apiUrl}/users/pharmacists`, this.getHttpOptions());
   }
 
-  /**
-   * ✅ Suspend User (Doctor/Pharmacist only)
-   */
+  approveUser(userId: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/users/approve/${userId}`, {}, this.getHttpOptions());
+  }
+
+  rejectUser(userId: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/users/reject/${userId}`, {}, this.getHttpOptions());
+  }
+
   suspendUser(userId: number): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/suspend/${userId}`, {});
+    return this.http.patch<void>(`${this.apiUrl}/users/suspend/${userId}`, {}, this.getHttpOptions());
   }
 
-  /**
-   * ✅ Delete User
-   */
   deleteUser(userId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${userId}`);
+    return this.http.delete<void>(`${this.apiUrl}/users/${userId}`, this.getHttpOptions());
   }
 }

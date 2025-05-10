@@ -4,6 +4,7 @@ import com.amn.dto.*;
 import com.amn.entity.*;
 import com.amn.entity.enums.FileType;
 import com.amn.entity.enums.OTPStatus;
+import com.amn.entity.enums.PrescriptionStatus;
 import com.amn.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class DoctorService {
     private final AnalysisRepository analysisRepository;
     private final SurgeryRepository surgeryRepository;
     private final VaccinationRepository vaccinationRepository;
+    private final MedicationRepository medicationRepository;
 
     public Optional<Doctor> login(String email, String password) {
         return doctorRepository.findByEmail(email)
@@ -82,18 +84,41 @@ public class DoctorService {
     }
 
 
-    public Prescription writePrescription(Long patientId, Prescription prescription, String doctorEmail) {
+    public PrescriptionDTO writePrescription(Long patientId, Long recordId, PrescriptionDTO prescriptionDTO, String doctorEmail) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-
         Doctor doctor = doctorRepository.findByEmail(doctorEmail)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        MedicalRecord record = medicalRecordRepository.findById(recordId)
+                .orElseThrow(() -> new RuntimeException("Record not found"));
 
-        prescription.setPrescribedDate(LocalDateTime.now());
-        prescription.setPatient(patient);
-        prescription.setPrescribingDoctor(doctor); // ✅ Critical
-        return prescriptionRepository.save(prescription);
+        Prescription prescription = Prescription.builder()
+                .prescribedDate(LocalDateTime.now())
+                .patient(patient)
+                .medicalRecord(record)
+                .prescribingDoctor(doctor)
+                .status(PrescriptionStatus.valueOf(prescriptionDTO.getStatus()))
+                .permanent(prescriptionDTO.isPermanent())
+                .build();
+
+        Prescription savedPrescription = prescriptionRepository.save(prescription);
+
+        List<Medication> medications = prescriptionDTO.getMedications().stream()
+                .map(medDTO -> Medication.builder()
+                        .name(medDTO.getName())
+                        .dosage(medDTO.getDosage())
+                        .period(medDTO.getPeriod())
+                        .permanent(medDTO.isPermanent())
+                        .prescription(savedPrescription)
+                        .build())
+                .collect(Collectors.toList());
+
+        medicationRepository.saveAll(medications);
+        savedPrescription.setMedications(medications);
+
+        return PrescriptionDTO.fromEntity(savedPrescription);
     }
+
 
 
     public MedicalFolder getMedicalFolderByCinAndName(String cin, String fullName) {
@@ -158,31 +183,57 @@ public class DoctorService {
                     return medicalFolderRepository.save(newFolder);
                 });
 
+        // ✅ Fetch Scans
         List<ScanDTO> scanDTOs = scanRepository.findAllByMedicalFolderId(folder.getId()).stream()
                 .map(ScanDTO::fromEntity)
                 .collect(Collectors.toList());
 
+        // ✅ Fetch Analyses
         List<AnalysisDTO> analysisDTOs = analysisRepository.findAllByMedicalFolderId(folder.getId()).stream()
                 .map(AnalysisDTO::fromEntity)
                 .collect(Collectors.toList());
 
+        // ✅ Fetch Surgeries
         List<SurgeryDTO> surgeryDTOs = surgeryRepository.findAllByMedicalFolderId(folder.getId()).stream()
                 .map(SurgeryDTO::fromEntity)
                 .collect(Collectors.toList());
 
+        // ✅ Fetch Prescriptions with Medications
         List<PrescriptionDTO> prescriptionDTOs = prescriptionRepository.findAllByPatientId(patient.getId())
                 .stream()
-                .map(PrescriptionDTO::fromEntity)
+                .map(prescription -> {
+                    List<MedicationDTO> medications = medicationRepository.findByPrescriptionId(prescription.getId())
+                            .stream()
+                            .map(MedicationDTO::fromEntity)
+                            .collect(Collectors.toList());
+
+                    PrescriptionDTO prescriptionDTO = PrescriptionDTO.fromEntity(prescription);
+                    prescriptionDTO.setMedications(medications);
+                    return prescriptionDTO;
+                })
                 .collect(Collectors.toList());
-        List<MedicalRecordDTO> recordDTOs = folder.getMedicalRecords()
+
+        // ✅ Fetch Medical Records with Prescriptions
+        List<MedicalRecordDTO> recordDTOs = medicalRecordRepository.findAllByMedicalFolderId(folder.getId())
                 .stream()
-                .map(MedicalRecordDTO::fromEntity)
+                .map(record -> {
+                    List<PrescriptionDTO> associatedPrescriptions = prescriptionDTOs.stream()
+                            .filter(p -> p.getMedicalRecordId() != null && p.getMedicalRecordId().equals(record.getId()))
+                            .collect(Collectors.toList());
+
+                    return MedicalRecordDTO.builder()
+                            .id(record.getId())
+                            .reason(record.getReason())
+                            .diagnosis(record.getDiagnosis())
+                            .notes(record.getNotes())
+                            .creationDate(record.getCreationDate())
+                            .doctorName(record.getDoctor() != null ? record.getDoctor().getFullName() : "Docteur inconnu")
+                            .prescriptions(associatedPrescriptions)
+                            .build();
+                })
                 .collect(Collectors.toList());
 
-
-
-
-
+        // ✅ Build the Patient Profile DTO
         return PatientProfileDTO.builder()
                 .id(patient.getId())
                 .fullName(patient.getFullName())
@@ -199,16 +250,15 @@ public class DoctorService {
                 .address(patient.getAddress())
                 .medicalFolderId(folder.getId())
                 .medicalRecords(recordDTOs)
-
                 .vaccinations(vaccinationRepository.findAllByMedicalFolderId(folder.getId()))
                 .visitLogs(folder.getVisitLogs())
                 .scans(scanDTOs)
                 .analyses(analysisDTOs)
                 .surgeries(surgeryDTOs)
-                .prescriptions(prescriptionDTOs)
-
+                .prescriptions(prescriptionDTOs)  // ✅ Include top-level prescriptions
                 .build();
     }
+
 
     public Scan uploadScanLocally(MultipartFile file, String title, String description, Long folderId) {
         try {
@@ -332,5 +382,9 @@ public class DoctorService {
     public Doctor getCurrentDoctorProfile(String email) {
         return doctorRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Doctor not found with email: " + email));
+    }
+
+    public Doctor findByEmail(String email) {
+        return doctorRepository.findByEmail(email).orElse(null);
     }
 }

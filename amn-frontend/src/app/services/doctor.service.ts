@@ -165,9 +165,12 @@ export class DoctorService {
     });
   }
 
-  getConsultationById(id: number): Observable<any> {
-    return this.http.get(`${this.API_URL}/consultation/${id}`, {
-      headers: this.getHeaders()
+  getConsultationById(recordId: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/consultation/${recordId}`, {
+      headers: this.getHeaders(),
     });
   }
+
+
+
 }

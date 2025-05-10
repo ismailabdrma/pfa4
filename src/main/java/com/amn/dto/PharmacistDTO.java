@@ -1,5 +1,6 @@
 package com.amn.dto;
 
+import com.amn.entity.enums.AccountStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +13,5 @@ public class PharmacistDTO {
     private String fullName;
     private String email;
     private String matricule;
-    private String status;
+    private AccountStatus status;
 }

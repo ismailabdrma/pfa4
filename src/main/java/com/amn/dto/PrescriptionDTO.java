@@ -23,13 +23,19 @@ public class PrescriptionDTO {
     private LocalDateTime dispensedDate;
     private String prescribingDoctorName;
     private String dispensingPharmacistName;
-    private List<MedicationDTO> medications;
 
+    // ✅ New Fields
+    private Long medicalRecordId;
     private Long medicalFolderId;
     private Long patientId;
-    private String patientName; // ✅ New Field
-    private String patientCIN; // ✅ New Field
+    private String patientName;
+    private String patientCIN;
 
+    private List<MedicationDTO> medications;
+
+    /**
+     * ✅ Static Method for Mapping from Entity to DTO
+     */
     public static PrescriptionDTO fromEntity(Prescription prescription) {
         return PrescriptionDTO.builder()
                 .id(prescription.getId())
@@ -37,6 +43,7 @@ public class PrescriptionDTO {
                 .permanent(prescription.isPermanent())
                 .prescribedDate(prescription.getPrescribedDate())
                 .dispensedDate(prescription.getDispensedDate())
+
                 .prescribingDoctorName(
                         prescription.getPrescribingDoctor() != null
                                 ? prescription.getPrescribingDoctor().getFullName()
@@ -47,18 +54,22 @@ public class PrescriptionDTO {
                                 ? prescription.getDispensingPharmacist().getFullName()
                                 : "Pharmacien inconnu"
                 )
-                .medications(
-                        prescription.getMedications() != null
-                                ? prescription.getMedications().stream()
-                                .map(MedicationDTO::fromEntity)
-                                .collect(Collectors.toList())
-                                : List.of()
+
+                // ✅ Link to Medical Record
+                .medicalRecordId(
+                        prescription.getMedicalRecord() != null
+                                ? prescription.getMedicalRecord().getId()
+                                : null
                 )
+
+                // ✅ Link to Medical Folder
                 .medicalFolderId(
                         prescription.getMedicalFolder() != null
                                 ? prescription.getMedicalFolder().getId()
                                 : null
                 )
+
+                // ✅ Patient Details
                 .patientId(
                         prescription.getPatient() != null
                                 ? prescription.getPatient().getId()
@@ -74,6 +85,16 @@ public class PrescriptionDTO {
                                 ? prescription.getPatient().getCin()
                                 : "Inconnu"
                 )
+
+                // ✅ Medications Mapping
+                .medications(
+                        prescription.getMedications() != null
+                                ? prescription.getMedications().stream()
+                                .map(MedicationDTO::fromEntity)
+                                .collect(Collectors.toList())
+                                : List.of()
+                )
+
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,15 +31,17 @@ public class Patient extends User {
     @JsonIgnore
     private MedicalFolder medicalFolder;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     @JsonIgnore
+    @BatchSize(size = 10)
     private Admin managedBy;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
+    @BatchSize(size = 10)
     private List<Medication> medications;
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 
     private List<OTP> otps;
 

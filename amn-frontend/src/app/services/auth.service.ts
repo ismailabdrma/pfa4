@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ export class AuthService {
   private tokenKey = 'auth_token';
   private emailKey = 'pending_email';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router ,
+              private  localStorageService: LocalStorageService) {}
 
   /**
    * ✅ Register Patient
@@ -58,6 +60,7 @@ export class AuthService {
             // For Doctor/Pharmacist, OTP is required
             this.setPendingEmail(credentials.email);
             this.router.navigate(['/verify-otp']);
+
           }
           else if (token && role === 'ADMIN') {
             this.saveToken(token);
@@ -92,6 +95,7 @@ export class AuthService {
 
           if (token && role) {
             this.saveToken(token);
+            this.localStorageService.setItem('user_email', email);
             this.redirectToDashboard(role);
           } else {
             alert('OTP verification failed. Missing token or role.');
@@ -132,6 +136,9 @@ export class AuthService {
    */
   getPendingEmail(): string {
     return localStorage.getItem(this.emailKey) || '';
+  }
+  getUserEmail(): string | null {
+    return this.localStorageService.getItem('user_email');
   }
 
   /**
@@ -178,4 +185,6 @@ export class AuthService {
       return null;
     }
   }
+
+
 }

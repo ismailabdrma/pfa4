@@ -1,6 +1,7 @@
 import { MedicationDTO } from './medication.dto';
 
 export interface PrescriptionDTO {
+    instructions: string;
   id: number;
   status: string; // PENDING, DISPENSED, CREATED, etc.
   permanent: boolean;

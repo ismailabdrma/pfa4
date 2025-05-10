@@ -5,6 +5,7 @@ import com.amn.entity.Medication;
 import com.amn.entity.Prescription;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +21,5 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     Optional<Prescription> findByMedicalRecordId(Long medicalRecordId);
     List<Prescription> findAllByPatientCinAndPatientFullName( String cin,  String fullName);
 
+    List<Prescription> findByMedicalFolderId(Long folderId);
 }

@@ -4,6 +4,7 @@ import com.amn.entity.enums.PrescriptionStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,16 +42,19 @@ public class Prescription {
     @ManyToOne
     private Doctor prescribingDoctor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medical_folder_id")
     @JsonIgnore
     private MedicalFolder medicalFolder;
-    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @BatchSize(size = 10)
     private List<Medication> medications = new ArrayList<>();
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
 
     @JoinColumn(name = "medical_record_id")
     @JsonIgnore
+    @BatchSize(size = 10)
     private MedicalRecord medicalRecord;
 // 🔥 THIS FIXES THE ERROR
 

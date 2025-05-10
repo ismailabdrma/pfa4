@@ -4,6 +4,8 @@ import com.amn.entity.MedicalRecord;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -16,6 +18,7 @@ public class MedicalRecordDTO {
     private String notes;
     private LocalDate creationDate;
     private String doctorName;
+    private List<PrescriptionDTO> prescriptions;
 
     public static MedicalRecordDTO fromEntity(MedicalRecord record) {
         return MedicalRecordDTO.builder()
@@ -25,6 +28,14 @@ public class MedicalRecordDTO {
                 .notes(record.getNotes())
                 .creationDate(record.getCreationDate())
                 .doctorName(record.getDoctor() != null ? record.getDoctor().getFullName() : "Docteur inconnu")
+                .prescriptions(
+                        record.getPrescriptions() != null
+                                ? record.getPrescriptions()
+                                .stream()
+                                .map(PrescriptionDTO::fromEntity)
+                                .collect(Collectors.toList())
+                                : null
+                )
                 .build();
     }
 }

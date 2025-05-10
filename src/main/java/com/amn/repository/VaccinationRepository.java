@@ -7,5 +7,7 @@ import java.util.List;
 public interface VaccinationRepository extends JpaRepository<Vaccination, Long> {
     List<Vaccination> findByMedicalFolder_Id(Long folderId);
     List<Vaccination> findAllByMedicalFolderId(Long folderId);
+
+    List<Vaccination> findByMedicalFolderId(Long folderId);
 // <-- add underscore _
 }

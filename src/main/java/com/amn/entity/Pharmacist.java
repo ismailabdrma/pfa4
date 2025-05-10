@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
@@ -21,14 +22,17 @@ public class Pharmacist extends User {
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
     // Relationship with Admin (who approved this pharmacist)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by_admin_id")
+    @BatchSize(size = 10)
+    @JsonIgnore
     private Admin approvedBy;
     private String matricule;
 
     // Relationship with Prescription (pharmacist dispenses prescriptions)
-    @OneToMany(mappedBy = "dispensingPharmacist", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "dispensingPharmacist", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
+    @BatchSize(size = 10)
     private List<Prescription> dispensedPrescriptions;
 
 

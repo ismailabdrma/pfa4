@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +18,6 @@ public class ConsultationWithPrescriptionDTO {
     private String notes;
     private LocalDateTime creationDate;
     private String doctorName; // ✅ Add this
-    private PrescriptionDTO prescription;
+    private List<PrescriptionDTO> prescriptions;
 
 }

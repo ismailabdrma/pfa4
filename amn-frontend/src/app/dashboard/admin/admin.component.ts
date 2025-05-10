@@ -33,11 +33,12 @@ export class AdminComponent implements OnInit {
     this.adminService.getAllPatients().subscribe({
       next: (data) => {
         this.patients = data;
+        console.log('Loaded patients:', data);
       },
       error: (err) => {
         console.error('Error loading patients:', err);
-        this.errorMessage = 'Error loading patients.';
-      }
+        this.errorMessage = err.error?.message || 'Error loading patients.';
+      },
     });
   }
 
@@ -48,11 +49,12 @@ export class AdminComponent implements OnInit {
     this.adminService.getAllDoctors().subscribe({
       next: (data) => {
         this.doctors = data;
+        console.log('Loaded doctors:', data);
       },
       error: (err) => {
         console.error('Error loading doctors:', err);
-        this.errorMessage = 'Error loading doctors.';
-      }
+        this.errorMessage = err.error?.message || 'Error loading doctors.';
+      },
     });
   }
 
@@ -63,16 +65,58 @@ export class AdminComponent implements OnInit {
     this.adminService.getAllPharmacists().subscribe({
       next: (data) => {
         this.pharmacists = data;
+        console.log('Loaded pharmacists:', data);
       },
       error: (err) => {
         console.error('Error loading pharmacists:', err);
-        this.errorMessage = 'Error loading pharmacists.';
+        this.errorMessage = err.error?.message || 'Error loading pharmacists.';
+      },
+    });
+  }
+
+  /**
+   * Approve User
+   */
+  approveUser(userId: number): void {
+    console.log('Approving user ID:', userId); // Add this
+    this.adminService.approveUser(userId).subscribe({
+      next: () => {
+        console.log('Approval successful, reloading data...');
+        this.loadDoctors();
+        this.loadPharmacists();
+        alert('User approved successfully.');
+      },
+      error: (err) => {
+        console.error('Error approving user:', err);
+        // Check if there's a response message
+        if (err.error?.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = 'Error approving user.';
+        }
       }
     });
   }
 
   /**
-   * Suspend a user (Doctor/Pharmacist)
+   * Reject User
+   */
+  rejectUser(userId: number): void {
+    this.adminService.rejectUser(userId).subscribe({
+      next: () => {
+        this.loadDoctors();
+        this.loadPharmacists();
+        alert('User rejected successfully.');
+      },
+      error: (err) => {
+        console.error('Error rejecting user:', err);
+        this.errorMessage = 'Error rejecting user.';
+      }
+    });
+  }
+
+  /**
+   * Suspend User (Doctor/Pharmacist)
    */
   suspendUser(userId: number): void {
     this.adminService.suspendUser(userId).subscribe({
@@ -89,7 +133,7 @@ export class AdminComponent implements OnInit {
   }
 
   /**
-   * Delete a user
+   * Delete User
    */
   deleteUser(userId: number): void {
     this.adminService.deleteUser(userId).subscribe({
